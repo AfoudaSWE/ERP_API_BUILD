@@ -1,7 +1,7 @@
 import Link from '@/components/router/Link';
 import { useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Bot, ShoppingCart, Store, ShoppingBag, Package,
+  LayoutDashboard, ShoppingCart, Store, ShoppingBag, Package,
   Users, Truck, Calculator, Receipt, Wallet, UserCog, Clock, Banknote,
   BarChart3, Settings, ChevronLeft, ChevronRight, Sparkles, Menu, X,
   Boxes, Building, UserPlus,
@@ -29,7 +29,6 @@ interface NavItem {
 
 export const navItems: NavItem[] = [
   { href: '/', icon: <LayoutDashboard className="h-5 w-5" />, labelKey: 'nav.dashboard', permission: 'dashboard.read' },
-  { href: '/ai-assistant', icon: <Bot className="h-5 w-5" />, labelKey: 'nav.aiAssistant', permission: 'ai.read' },
   { href: '/sales', icon: <ShoppingCart className="h-5 w-5" />, labelKey: 'nav.sales', permission: 'sales.read' },
   { href: '/pos', icon: <Store className="h-5 w-5" />, labelKey: 'nav.pos', permission: 'pos.use' },
   { href: '/purchases', icon: <ShoppingBag className="h-5 w-5" />, labelKey: 'nav.purchases', permission: 'purchases.read' },
@@ -96,7 +95,7 @@ export function Sidebar({
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="truncate text-lg font-bold text-navy-900 dark:text-white">
-              {isRTL ? 'منصة الأعمال' : 'BizPlatform'}
+              {isRTL ? 'ClubGenies ERP' : 'ClubGenies ERP'}
             </span>
           </div>
 

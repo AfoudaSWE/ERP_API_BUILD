@@ -2,7 +2,6 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import Dashboard from "@/app/page";
 import AccountingPage from "@/app/accounting/page";
-import AIAssistantPage from "@/app/ai-assistant/page";
 import AttendancePage from "@/app/attendance/page";
 import AttendancePortal, {
   AttendancePortalLogin,
@@ -201,14 +200,6 @@ export default function App() {
             element={
               <PermissionRoute permission="accounting.read">
                 <AccountingRoute />
-              </PermissionRoute>
-            }
-          />
-          <Route
-            path="/ai-assistant"
-            element={
-              <PermissionRoute permission="ai.read">
-                <AIAssistantPage />
               </PermissionRoute>
             }
           />

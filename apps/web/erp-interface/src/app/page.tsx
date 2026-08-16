@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { SalesChart } from '@/components/dashboard/SalesChart';
-import { DailyAISummary } from '@/components/dashboard/DailyAISummary';
 import Link from '@/components/router/Link';
 import { useApiData } from '@/lib/api-data';
 import { useAuth } from '@/lib/auth';
@@ -30,8 +29,6 @@ export default function Dashboard() {
   return <AppLayout>
     <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><h1 className="text-2xl font-bold text-navy-900 dark:text-white md:text-3xl">{ar ? `مرحباً، ${user?.name || ''} 👋` : `Welcome, ${user?.name || ''} 👋`}</h1><p className="mt-1 text-navy-500 dark:text-navy-400">{ar ? 'إليك ملخص أعمالك اليوم' : "Here's your business summary for today"}</p></div><div className="flex items-center gap-3">{can('pos.use') && <Link href="/pos" className="btn btn-primary btn-md"><ShoppingCart className="h-4 w-4" />{ar ? 'نقطة البيع' : 'Open POS'}</Link>}{(can('sales.create') || can('sales.write')) && <Link href="/sales/new" className="btn btn-secondary btn-md">{ar ? 'فاتورة جديدة' : 'New invoice'}</Link>}</div></header>
 
-    <DailyAISummary companyId={user?.companyId ?? ''} locale={locale} />
-
     <section className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       <StatCard title={ar ? 'مبيعات اليوم' : 'Sales today'} value={stats.salesToday} format="currency" locale={ar ? 'ar-EG' : 'en-EG'} icon={<ShoppingCart className="h-5 w-5 text-primary-600" />} iconBg="bg-primary-100 dark:bg-primary-900/30" />
       <StatCard title={ar ? 'مبيعات الشهر' : 'Monthly sales'} value={stats.salesThisMonth} format="currency" locale={ar ? 'ar-EG' : 'en-EG'} change={stats.salesGrowth} changeLabel={ar ? 'عن الشهر الماضي' : 'vs last month'} trend={stats.salesGrowth >= 0 ? 'up' : 'down'} icon={<TrendingUp className="h-5 w-5 text-success-600" />} iconBg="bg-success-50 dark:bg-success-900/30" />
@@ -53,7 +50,7 @@ export default function Dashboard() {
     </section>
 
     <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2"><SalesChart data={salesChart} title={ar ? 'اتجاه المبيعات' : 'Sales trend'} locale={locale} /><SalesChart data={categoryChart} title={ar ? 'المبيعات حسب الفئة' : 'Sales by category'} type="pie" locale={locale} /></section>
-    <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2"><article className="card"><header className="card-header flex items-center justify-between"><h2 className="font-semibold text-navy-900 dark:text-white">{ar ? 'توصيات الذكاء الاصطناعي' : 'AI recommendations'}</h2><Link href="/ai-assistant" className="text-sm font-medium text-ai-600">{ar ? 'عرض الكل' : 'View all'}</Link></header><div className="divide-y divide-navy-100 p-2 dark:divide-navy-700">{recommendations.map((item) => <Link key={item.title} href={item.href} className="flex items-start gap-3 rounded-lg p-3 hover:bg-navy-50 dark:hover:bg-navy-800"><span className={`rounded-lg p-2 ${item.color}`}><Sparkles className="h-4 w-4" /></span><div><p className="text-sm font-semibold text-navy-900 dark:text-white">{item.title}</p><p className="mt-1 text-xs leading-5 text-navy-500">{item.body}</p></div></Link>)}{!recommendations.length && <p className="p-8 text-center text-sm text-navy-500">{ar ? 'لا توجد توصيات عاجلة.' : 'No urgent recommendations.'}</p>}</div></article><SalesChart data={bestSellerChart} title={ar ? 'أفضل المنتجات مبيعاً' : 'Best-selling products'} type="bar" locale={locale} /></section>
+    <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2"><article className="card"><header className="card-header flex items-center justify-between"><h2 className="font-semibold text-navy-900 dark:text-white">{ar ? 'توصيات الذكاء الاصطناعي' : 'AI recommendations'}</h2></header><div className="divide-y divide-navy-100 p-2 dark:divide-navy-700">{recommendations.map((item) => <Link key={item.title} href={item.href} className="flex items-start gap-3 rounded-lg p-3 hover:bg-navy-50 dark:hover:bg-navy-800"><span className={`rounded-lg p-2 ${item.color}`}><Sparkles className="h-4 w-4" /></span><div><p className="text-sm font-semibold text-navy-900 dark:text-white">{item.title}</p><p className="mt-1 text-xs leading-5 text-navy-500">{item.body}</p></div></Link>)}{!recommendations.length && <p className="p-8 text-center text-sm text-navy-500">{ar ? 'لا توجد توصيات عاجلة.' : 'No urgent recommendations.'}</p>}</div></article><SalesChart data={bestSellerChart} title={ar ? 'أفضل المنتجات مبيعاً' : 'Best-selling products'} type="bar" locale={locale} /></section>
     {isLoading && <div className="fixed bottom-5 end-5 rounded-full bg-navy-900 px-4 py-2 text-xs text-white shadow-lg">{ar ? 'تحديث البيانات…' : 'Refreshing data…'}</div>}
   </AppLayout>;
 }

@@ -135,7 +135,7 @@ export default function SettingsPage() {
 
         {/* Version Info */}
         <div className="mt-8 text-center text-sm text-navy-400">
-          <p>{locale === 'ar' ? 'منصة الأعمال الإصدار 1.0.0' : 'BizPlatform Version 1.0.0'}</p>
+          <p>{locale === 'ar' ? 'ClubGenies ERP الإصدار 1.0.0' : 'ClubGenies ERP Version 1.0.0'}</p>
           <p className="mt-1">© 2024 {locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}</p>
         </div>
       </div>

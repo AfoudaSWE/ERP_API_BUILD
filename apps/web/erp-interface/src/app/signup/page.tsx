@@ -20,25 +20,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [emailEdited, setEmailEdited] = useState(false);
-
-  function suggestEmail(nextName: string, nextCompanyName: string) {
-    const local = slugForEmail(nextName.split(/\s+/)[0] ?? '');
-    const domain = slugForEmail(nextCompanyName);
-    if (!local || !domain) return '';
-    return `${local}@${domain}.com`;
-  }
-
-  function onNameChange(value: string) {
-    setName(value);
-    if (!emailEdited) setEmail(suggestEmail(value, companyName));
-  }
-
-  function onCompanyNameChange(value: string) {
-    setCompanyName(value);
-    if (!emailEdited) setEmail(suggestEmail(name, value));
-  }
+  const domain = slugForEmail(companyName);
+  const email = domain ? `admin@${domain}.com` : '';
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -102,7 +85,7 @@ export default function SignupPage() {
               minLength={2}
               maxLength={120}
               value={companyName}
-              onChange={(e) => onCompanyNameChange(e.target.value)}
+              onChange={(e) => setCompanyName(e.target.value)}
             />
           </div>
           <div>
@@ -120,7 +103,7 @@ export default function SignupPage() {
               minLength={2}
               maxLength={120}
               value={name}
-              onChange={(e) => onNameChange(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
           <div>
@@ -129,15 +112,14 @@ export default function SignupPage() {
               id="email"
               name="email"
               type="email"
-              className="input"
+              className="input bg-navy-50 dark:bg-navy-800"
               required
-              autoComplete="email"
-              placeholder={ar ? 'مثال: ahmed@malekstore.com' : 'e.g. ahmed@malekstore.com'}
+              readOnly
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setEmailEdited(true); }}
+              placeholder={ar ? 'اكتب اسم الشركة أولاً' : 'Type the company name first'}
             />
             <p className="mt-1 text-xs text-navy-400">
-              {ar ? 'اقترحناه من اسمك واسم الشركة — عدّله لو حابب.' : 'Suggested from your name and company — edit it if you like.'}
+              {ar ? 'ثابت حسب اسم الشركة، بيتحدّث تلقائيًا لما تغيّر اسم الشركة.' : 'Fixed to the company name, and updates automatically as you edit it.'}
             </p>
           </div>
           <div>

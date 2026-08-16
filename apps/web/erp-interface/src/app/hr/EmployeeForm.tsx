@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 
 type Option = { id: string; name: string; nameAr?: string; isActive: boolean };
 type ManagerOption = { userId: string; employeeCode: string; name: string; nameAr: string };
@@ -61,7 +61,7 @@ export function EmployeeForm({
       aria-modal="true"
     >
       <form onSubmit={onSubmit} className="card mx-auto my-6 w-full max-w-4xl p-6">
-        <h2 className="mb-5 text-xl font-bold">
+        <h2 className="mb-6 text-xl font-bold">
           {editing
             ? ar
               ? "تعديل بيانات الموظف"
@@ -70,7 +70,8 @@ export function EmployeeForm({
               ? "إضافة موظف جديد"
               : "Onboard employee"}
         </h2>
-        <div className="grid gap-4 md:grid-cols-2">
+
+        <FormSection title={ar ? "البيانات الشخصية" : "Personal details"}>
           <label className="block text-sm">
             {ar ? "الاسم" : "Name"}
             <input
@@ -103,16 +104,6 @@ export function EmployeeForm({
             </>
           )}
           <label className="block text-sm">
-            {ar ? "كود الموظف" : "Employee code"}
-            <input
-              required
-              className="input mt-1 w-full"
-              name="employeeCode"
-              type="text"
-              defaultValue={employee?.employeeCode}
-            />
-          </label>
-          <label className="block text-sm">
             {ar ? "الرقم القومي" : "National ID"}
             <input
               className="input mt-1 w-full"
@@ -128,6 +119,19 @@ export function EmployeeForm({
               name="phone"
               type="text"
               defaultValue={employee?.phone}
+            />
+          </label>
+        </FormSection>
+
+        <FormSection title={ar ? "بيانات التوظيف" : "Employment details"}>
+          <label className="block text-sm">
+            {ar ? "كود الموظف" : "Employee code"}
+            <input
+              required
+              className="input mt-1 w-full"
+              name="employeeCode"
+              type="text"
+              defaultValue={employee?.employeeCode}
             />
           </label>
           <label className="block text-sm">
@@ -167,13 +171,6 @@ export function EmployeeForm({
             ar={ar}
             defaultValue={employee?.departmentId ?? ""}
           />
-          <Select
-            name="shiftId"
-            label={ar ? "الوردية" : "Shift"}
-            rows={shifts}
-            ar={ar}
-            defaultValue={employee?.shift?.id ?? ""}
-          />
           <label className="block text-sm">
             {ar ? "المدير المباشر" : "Manager"}
             <select
@@ -205,6 +202,16 @@ export function EmployeeForm({
               </select>
             </label>
           )}
+        </FormSection>
+
+        <FormSection title={ar ? "الفروع والوردية" : "Assignment"} last>
+          <Select
+            name="shiftId"
+            label={ar ? "الوردية" : "Shift"}
+            rows={shifts}
+            ar={ar}
+            defaultValue={employee?.shift?.id ?? ""}
+          />
           <Checks
             name="branchIds"
             label={ar ? "الفروع (مطلوب)" : "Branches (required)"}
@@ -219,7 +226,8 @@ export function EmployeeForm({
             ar={ar}
             defaultChecked={employeeWorkplaceIds}
           />
-        </div>
+        </FormSection>
+
         <div className="mt-6 flex justify-end gap-2">
           <button type="button" className="btn btn-ghost" onClick={onCancel}>
             {ar ? "إلغاء" : "Cancel"}
@@ -231,6 +239,25 @@ export function EmployeeForm({
         </div>
       </form>
     </div>
+  );
+}
+
+function FormSection({
+  title,
+  last,
+  children,
+}: {
+  title: string;
+  last?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <fieldset className={`grid gap-4 md:grid-cols-2 ${last ? "" : "mb-6 border-b border-navy-100 pb-6 dark:border-navy-800"}`}>
+      <legend className="col-span-full mb-1 text-xs font-semibold uppercase tracking-wide text-navy-400">
+        {title}
+      </legend>
+      {children}
+    </fieldset>
   );
 }
 

@@ -124,10 +124,15 @@ export function EmployeeCsvImport({ ar, onImported }: { ar: boolean; onImported:
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="mb-3 text-sm text-navy-500">
+            <p className="mb-1 text-sm text-navy-500">
               {ar
-                ? "الأعمدة: name, nameAr, email, password, employeeCode, nationalId, phone, jobTitle, hireDate, baseSalary, branchIds (مفصولة بـ ;), shiftId, workplaceIds (مفصولة بـ ;), managerId"
-                : "Columns: name, nameAr, email, password, employeeCode, nationalId, phone, jobTitle, hireDate, baseSalary, branchIds (semicolon-separated), shiftId, workplaceIds (semicolon-separated), managerId"}
+                ? "حمّل النموذج، املأه بموظفيك، وارفعه هنا."
+                : "Download the template, fill in your employees, and upload it here."}
+            </p>
+            <p className="mb-3 text-xs text-navy-400">
+              {ar
+                ? "branchIds وworkplaceIds تقبل أكتر من قيمة مفصولة بـ ؛"
+                : "branchIds and workplaceIds accept multiple values separated by ;"}
             </p>
             <button type="button" className="btn btn-ghost btn-sm mb-4" onClick={downloadTemplate}>
               <Download className="h-4 w-4" />

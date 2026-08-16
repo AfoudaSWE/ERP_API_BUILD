@@ -1,0 +1,31 @@
+{
+    "name":  "jobs-producers",
+    "$schema":  "../../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "library",
+    "sourceRoot":  "libs/backend/jobs/producers/src",
+    "targets":  {
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p libs/backend/jobs/producers/tsconfig.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint libs/backend/jobs/producers/src"
+                                             }
+                             },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run --config libs/backend/jobs/producers/vitest.config.ts"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:jobs",
+                 "platform:backend",
+                 "type:application"
+             ]
+}

@@ -1,0 +1,16 @@
+{
+    "extends":  "../../../../tsconfig.base.json",
+    "compilerOptions":  {
+                            "module":  "NodeNext",
+                            "moduleResolution":  "NodeNext",
+                            "types":  [
+                                          "node",
+                                          "vitest/globals"
+                                      ],
+                            "noEmit":  true
+                        },
+    "include":  [
+                    "src/**/*.ts",
+                    "../contracts/src/**/*.ts"
+                ]
+}

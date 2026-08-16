@@ -1,0 +1,41 @@
+{
+    "name":  "automation-api",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot":  "apps/automation/automation-api/src",
+    "projectType":  "application",
+    "tags":  [
+                 "scope:retail",
+                 "platform:backend",
+                 "runtime:node",
+                 "type:integration"
+             ],
+    "targets":  {
+                    "serve":  {
+                                  "executor":  "nx:run-commands",
+                                  "options":  {
+                                                  "command":  "node --env-file-if-exists=apps/automation/automation-api/.env --watch apps/automation/automation-api/src/main.js"
+                                              }
+                              },
+                    "build":  {
+                                  "executor":  "nx:run-commands",
+                                  "outputs":  [
+                                                  "{workspaceRoot}/dist/apps/automation/automation-api"
+                                              ],
+                                  "options":  {
+                                                  "command":  "node apps/automation/automation-api/scripts/build.mjs"
+                                              }
+                              },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run apps/automation/automation-api/src"
+                                             }
+                             },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint apps/automation/automation-api/src apps/automation/automation-api/scripts"
+                                             }
+                             }
+                }
+}

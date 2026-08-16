@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./apps/web/erp-interface" },
+    { "path": "./apps/api/erp-api" },
+    { "path": "./libs/shared/contracts" }
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "ERP Domain"
+  short_description: "Implement reliable ERP business workflows"
+  default_prompt: "Use $erp-domain to implement a production-ready ERP workflow in this repository."

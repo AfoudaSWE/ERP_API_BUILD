@@ -1,0 +1,11 @@
+html[dir="rtl"] body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; }
+html[dir="rtl"] .product-badge { left: auto; right: 14px; }
+html[dir="rtl"] .product-actions { right: auto; left: 12px; transform: translateX(-58px); }
+html[dir="rtl"] .product-card:hover .product-actions { transform: translateX(0); }
+html[dir="rtl"] .category-card__art { right: auto; left: -8%; transform: rotate(-18deg); }
+html[dir="rtl"] .cart-drawer { right: auto; left: 0; transform: translateX(-110%); }
+html[dir="rtl"] .cart-drawer.is-open { transform: translateX(0); }
+html[dir="rtl"] .ai-assistant { right: auto; left: 24px; }
+html[dir="rtl"] .ai-panel { right: auto; left: 0; }
+html[dir="rtl"] .toast-stack { right: auto; left: 20px; }
+html[dir="rtl"] .phone { transform: rotateY(18deg) rotateZ(-6deg); }

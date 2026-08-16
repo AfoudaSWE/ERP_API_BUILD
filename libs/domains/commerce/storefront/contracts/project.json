@@ -1,0 +1,25 @@
+{
+    "name":  "commerce-storefront-contracts",
+    "$schema":  "../../../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "library",
+    "sourceRoot":  "libs/domains/commerce/storefront/contracts/src",
+    "targets":  {
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p libs/domains/commerce/storefront/contracts/tsconfig.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint libs/domains/commerce/storefront/contracts/src"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:commerce",
+                 "platform:isomorphic",
+                 "type:contracts"
+             ]
+}

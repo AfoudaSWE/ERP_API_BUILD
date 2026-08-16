@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Quality and Linting"
+  short_description: "Configure consistent automated code quality"
+  default_prompt: "Use $code-quality-linting to improve this repository's quality automation without conflicting tools."

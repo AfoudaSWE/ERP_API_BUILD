@@ -1,0 +1,2 @@
+import { Link, useParams } from 'react-router-dom';
+export default function OrderSuccessPage(){const {orderId}=useParams();return <main className="state-page"><span className="state-panel__icon">✓</span><h1>Order confirmed</h1><p>Your order was created and sent to the ERP sales workflow.</p><div className="hero__actions"><Link className="btn btn--primary" to={`/account/orders/${orderId}`}>View order</Link><Link className="btn btn--ghost" to="/products">Continue shopping</Link></div></main>}

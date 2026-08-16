@@ -1,0 +1,31 @@
+{
+    "name":  "commerce-catalog-contracts",
+    "$schema":  "../../../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "library",
+    "sourceRoot":  "libs/domains/commerce/catalog/contracts/src",
+    "targets":  {
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p libs/domains/commerce/catalog/contracts/tsconfig.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint libs/domains/commerce/catalog/contracts/src"
+                                             }
+                             },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run libs/domains/commerce/catalog/contracts/src"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:commerce",
+                 "platform:isomorphic",
+                 "type:contracts"
+             ]
+}

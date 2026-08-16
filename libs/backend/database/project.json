@@ -1,0 +1,25 @@
+{
+    "name":  "shared-backend-database",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "library",
+    "sourceRoot":  "libs/backend/database/src",
+    "targets":  {
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p libs/backend/database/tsconfig.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint libs/backend/database/src"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:shared",
+                 "platform:backend",
+                 "type:data-access"
+             ]
+}

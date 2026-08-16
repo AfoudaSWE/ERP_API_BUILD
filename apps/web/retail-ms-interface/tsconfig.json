@@ -1,0 +1,15 @@
+{
+    "extends":  "../../../tsconfig.json",
+    "compilerOptions":  {
+                            "baseUrl":  "../../..",
+                            "paths":  {
+                                          "@/*":  [
+                                                      "apps/web/retail-ms-interface/src/*"
+                                                  ]
+                                      }
+                        },
+    "include":  [
+                    "src",
+                    "vite.config.ts"
+                ]
+}

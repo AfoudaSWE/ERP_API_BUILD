@@ -1,0 +1,8 @@
+import{z}from'zod';import{isoDateSchema,uuidSchema}from'./common.js';import{moneySchema}from'./decimal.js';
+export const financialAccountInputSchema=z.object({name:z.string().min(2).max(120),type:z.enum(['cash','bank','wallet']),currency:z.enum(['EGP','USD','EUR']).default('EGP'),openingBalance:moneySchema.default('0')});
+export const transferInputSchema=z.object({fromAccountId:uuidSchema,toAccountId:uuidSchema,amount:moneySchema,businessDate:isoDateSchema,description:z.string().min(3).max(300)}).refine(v=>v.fromAccountId!==v.toAccountId,'Accounts must differ');
+export const expenseInputSchema=z.object({description:z.string().min(3).max(300),amount:moneySchema,taxAmount:moneySchema.default('0'),expenseDate:isoDateSchema,paymentMethod:z.enum(['cash','bank_transfer','card','check']).default('cash')});
+export const expenseActionSchema=z.object({action:z.enum(['submit','approve','reject','pay']),reason:z.string().max(300).optional(),accountId:uuidSchema.optional()});
+export const reconciliationInputSchema=z.object({accountId:uuidSchema,statementReference:z.string().min(1).max(120),startDate:isoDateSchema,endDate:isoDateSchema,closingBalance:moneySchema,lines:z.array(z.object({externalId:z.string().min(1),businessDate:isoDateSchema,description:z.string(),amount:moneySchema})).default([])});
+export const reconciliationActionSchema=z.object({action:z.enum(['match','complete']),lineId:uuidSchema.optional(),movementId:uuidSchema.optional()});
+export type TransferInput=z.infer<typeof transferInputSchema>;export type ExpenseInput=z.infer<typeof expenseInputSchema>;export type ReconciliationInput=z.infer<typeof reconciliationInputSchema>;

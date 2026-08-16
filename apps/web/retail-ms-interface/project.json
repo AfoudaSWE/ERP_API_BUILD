@@ -1,0 +1,41 @@
+{
+    "name":  "retail_ms_interface",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot":  "apps/web/retail-ms-interface/src",
+    "projectType":  "application",
+    "tags":  [
+                 "scope:retail",
+                 "platform:frontend",
+                 "runtime:browser",
+                 "type:app"
+             ],
+    "targets":  {
+                    "serve":  {
+                                  "executor":  "nx:run-commands",
+                                  "options":  {
+                                                  "command":  "vite --config apps/web/retail-ms-interface/vite.config.ts --configLoader runner"
+                                              }
+                              },
+                    "build":  {
+                                  "executor":  "nx:run-commands",
+                                  "outputs":  [
+                                                  "{workspaceRoot}/dist/apps/web/retail-ms-interface"
+                                              ],
+                                  "options":  {
+                                                  "command":  "vite build --config apps/web/retail-ms-interface/vite.config.ts --configLoader runner"
+                                              }
+                              },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run --config apps/web/retail-ms-interface/vite.config.ts --configLoader runner"
+                                             }
+                             },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint apps/web/retail-ms-interface/src"
+                                             }
+                             }
+                }
+}

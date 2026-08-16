@@ -1,0 +1,63 @@
+{
+    "name":  "vision-service",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "application",
+    "sourceRoot":  "apps/services/vision-service/src",
+    "tags":  [
+                 "scope:retail",
+                 "platform:backend",
+                 "runtime:node",
+                 "type:app"
+             ],
+    "targets":  {
+                    "serve":  {
+                                  "executor":  "nx:run-commands",
+                                  "options":  {
+                                                  "commands":  [
+                                                                   "tsc -p apps/services/vision-service/tsconfig.app.json",
+                                                                   "node dist/apps/services/vision-service/main.js"
+                                                               ],
+                                                  "parallel":  false
+                                              }
+                              },
+                    "build":  {
+                                  "executor":  "nx:run-commands",
+                                  "outputs":  [
+                                                  "{workspaceRoot}/dist/apps/services/vision-service"
+                                              ],
+                                  "options":  {
+                                                  "command":  "tsc -p apps/services/vision-service/tsconfig.app.json"
+                                              }
+                              },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "jest --config apps/services/vision-service/jest.config.js"
+                                             }
+                             },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint apps/services/vision-service/src apps/services/vision-service/prisma/seed.ts"
+                                             }
+                             },
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc -p apps/services/vision-service/tsconfig.spec.json --noEmit"
+                                                  }
+                                  },
+                    "migration":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "prisma migrate deploy --schema apps/services/vision-service/prisma/schema.prisma"
+                                                  }
+                                  },
+                    "seed":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "tsx apps/services/vision-service/prisma/seed.ts"
+                                             }
+                             }
+                }
+}

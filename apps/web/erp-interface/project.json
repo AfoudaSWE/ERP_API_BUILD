@@ -1,0 +1,32 @@
+{
+    "name":  "erp_interface",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "application",
+    "sourceRoot":  "apps/web/erp-interface/src",
+    "targets":  {
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run --config apps/web/erp-interface/vitest.config.ts"
+                                             }
+                             },
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p apps/web/erp-interface/tsconfig.app.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint apps/web/erp-interface/src"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:erp",
+                 "platform:frontend",
+                 "runtime:browser",
+                 "type:app"
+             ]
+}

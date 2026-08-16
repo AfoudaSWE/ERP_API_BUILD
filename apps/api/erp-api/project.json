@@ -1,0 +1,87 @@
+{
+    "name":  "erp_api",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "application",
+    "sourceRoot":  "apps/api/erp-api/src",
+    "targets":  {
+                    "serve":  {
+                                  "executor":  "nx:run-commands",
+                                  "options":  {
+                                                  "command":  "tsx watch apps/api/erp-api/src/main.ts"
+                                              }
+                              },
+                    "build":  {
+                                  "executor":  "nx:run-commands",
+                                  "outputs":  [
+                                                  "{workspaceRoot}/dist/apps/api/erp-api"
+                                              ],
+                                  "options":  {
+                                                  "command":  "esbuild ./src/main.ts ./src/db/migrate.ts --bundle --platform=node --format=cjs --outdir=../../../dist/apps/api/erp-api",
+                                                  "cwd":  "{workspaceRoot}/apps/api/erp-api"
+                                              }
+                              },
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p apps/api/erp-api/tsconfig.app.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint apps/api/erp-api/src"
+                                             }
+                             },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run --config apps/api/erp-api/vitest.config.ts"
+                                             }
+                             },
+                    "migrate":  {
+                                    "executor":  "nx:run-commands",
+                                    "options":  {
+                                                    "command":  "tsx apps/api/erp-api/src/db/migrate.ts"
+                                                }
+                                },
+                    "seed":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "tsx apps/api/erp-api/src/db/seed.ts"
+                                             }
+                             },
+                    "seed-business":  {
+                                          "executor":  "nx:run-commands",
+                                          "options":  {
+                                                          "command":  "tsx apps/api/erp-api/src/db/seed-business.ts"
+                                                      }
+                                      },
+                    "seed-storefront":  {
+                                            "executor":  "nx:run-commands",
+                                            "options":  {
+                                                            "command":  "tsx apps/api/erp-api/src/db/seed-storefront.ts"
+                                                        }
+                                        },
+                    "seed-accounting":  {
+                                            "executor":  "nx:run-commands",
+                                            "options":  {
+                                                            "command":  "tsx apps/api/erp-api/src/db/seed-accounting.ts"
+                                                        }
+                                        },
+                    "reset":  {
+                                  "executor":  "nx:run-commands",
+                                  "options":  {
+                                                  "command":  "tsx apps/api/erp-api/src/db/reset.ts"
+                                              }
+                              }
+                },
+    "implicitDependencies":  [
+                                 "contracts"
+                             ],
+    "tags":  [
+                 "scope:erp",
+                 "platform:backend",
+                 "runtime:node",
+                 "type:app"
+             ]
+}

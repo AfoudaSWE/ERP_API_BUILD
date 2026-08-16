@@ -1,0 +1,25 @@
+{
+    "name":  "shared-frontend-auth",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "library",
+    "sourceRoot":  "libs/frontend/auth/src",
+    "targets":  {
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p libs/frontend/auth/tsconfig.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint libs/frontend/auth/src"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:shared",
+                 "platform:frontend",
+                 "type:feature"
+             ]
+}

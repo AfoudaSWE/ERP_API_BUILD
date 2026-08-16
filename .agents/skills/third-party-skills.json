@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-08-14",
+  "skills": [
+    {
+      "name": "api-design-principles",
+      "repository": "https://github.com/wshobson/agents",
+      "commit": "c4b82b0ad771190355eb8e204b1329732a18449a",
+      "path": "plugins/backend-development/skills/api-design-principles"
+    },
+    {
+      "name": "nodejs-backend-patterns",
+      "repository": "https://github.com/wshobson/agents",
+      "commit": "c4b82b0ad771190355eb8e204b1329732a18449a",
+      "path": "plugins/javascript-typescript/skills/nodejs-backend-patterns"
+    },
+    {
+      "name": "tailwind-design-system",
+      "repository": "https://github.com/wshobson/agents",
+      "commit": "c4b82b0ad771190355eb8e204b1329732a18449a",
+      "path": "plugins/frontend-mobile-development/skills/tailwind-design-system"
+    },
+    {
+      "name": "nestjs-best-practices",
+      "repository": "https://github.com/kadajett/agent-nestjs-skills",
+      "commit": "3986e0cede33958e000f959031cbee0cd83c2941",
+      "path": "skills/nestjs-best-practices"
+    },
+    {
+      "name": "nx-monorepo",
+      "repository": "https://github.com/giuseppe-trisciuoglio/developer-kit",
+      "commit": "306f428f278d83722afdea44a7398dc46dab967f",
+      "path": "plugins/developer-kit-typescript/skills/nx-monorepo"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("VISION_DATABASE_URL")
+}
+
+enum DirectionMode {
+  TOP_TO_BOTTOM_ENTRY
+  BOTTOM_TO_TOP_ENTRY
+}
+
+enum CrossingDirection {
+  ENTER
+  EXIT
+}
+
+model Store {
+  id          String           @id @default(uuid()) @db.Uuid
+  code        String           @unique
+  name        String
+  timezone    String
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  cameras     Camera[]
+  occupancy   StoreOccupancy?
+  events      CrossingEvent[]
+
+  @@index([isActive])
+}
+
+model Camera {
+  id            String          @id @default(uuid()) @db.Uuid
+  cameraId      String          @unique
+  storeId       String          @db.Uuid
+  name          String
+  location      String?
+  directionMode DirectionMode
+  isActive      Boolean         @default(true)
+  apiKeyHash    String
+  lastSeenAt    DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  store         Store           @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  snapshots     CameraSnapshot[]
+  events        CrossingEvent[]
+
+  @@index([storeId, isActive])
+  @@index([lastSeenAt])
+}
+
+model CameraSnapshot {
+  id                 String   @id @default(uuid()) @db.Uuid
+  cameraId           String   @db.Uuid
+  entered            Int
+  exited             Int
+  currentOccupancy   Int
+  activeTrackCount   Int
+  capturedAt         DateTime
+  receivedAt         DateTime @default(now())
+  camera             Camera   @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+
+  @@index([cameraId, capturedAt(sort: Desc)])
+}
+
+model StoreOccupancy {
+  storeId           String   @id @db.Uuid
+  currentOccupancy  Int      @default(0)
+  totalEnteredToday Int      @default(0)
+  totalExitedToday  Int      @default(0)
+  totalsDate        DateTime @db.Date
+  peakOccupancyToday Int     @default(0)
+  lastUpdatedAt     DateTime @default(now())
+  store             Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+model CrossingEvent {
+  id         String            @id @default(uuid()) @db.Uuid
+  eventId    String            @unique
+  cameraId   String            @db.Uuid
+  storeId    String            @db.Uuid
+  trackId    Int
+  direction  CrossingDirection
+  confidence Float?
+  occurredAt DateTime
+  receivedAt DateTime          @default(now())
+  camera     Camera            @relation(fields: [cameraId], references: [id], onDelete: Restrict)
+  store      Store             @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@index([storeId, occurredAt])
+  @@index([cameraId, occurredAt])
+  @@index([storeId, direction, occurredAt])
+}

@@ -1,0 +1,1 @@
+import{expect,test}from'./fixtures/auth';test('finance manager sees live cash and expense workflows',async({page,loginAs})=>{await loginAs('financeManager');await page.goto('/cash-banks');await expect(page.getByText(/Cash and banks|النقدية والبنوك/)).toBeVisible();await page.goto('/expenses');await expect(page.getByText(/Expenses|المصروفات/)).toBeVisible();});

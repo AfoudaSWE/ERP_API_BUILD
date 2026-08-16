@@ -1,0 +1,4 @@
+interface:
+  display_name: "ERP E-commerce Integration"
+  short_description: "Integrate ERP and commerce data safely"
+  default_prompt: "Use $erp-ecommerce-integration to implement reliable ERP and commerce synchronization."

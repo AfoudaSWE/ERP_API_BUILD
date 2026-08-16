@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture Engineering"
+  short_description: "Design and implement resilient software architecture"
+  default_prompt: "Use $architecture-engineering to design and implement a production-ready architecture for this repository."

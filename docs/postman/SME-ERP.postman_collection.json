@@ -1,0 +1,154 @@
+{
+  "info": {
+    "_postman_id": "74f9908a-4918-40a3-a401-3331eb828ff5",
+    "name": "SME ERP API",
+    "description": "Local collection for the Nx SME ERP API. Run Authentication / Login first; it automatically stores the JWT in the selected environment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:3333/api" }],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "auth": { "type": "noauth" },
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/health", "description": "Does not require authentication." }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "auth": { "type": "noauth" },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Login succeeded', function () { pm.response.to.have.status(200); });",
+                "const body = pm.response.json();",
+                "if (body.data && body.data.accessToken) pm.environment.set('accessToken', body.data.accessToken);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Current User",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/auth/me" }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        { "name": "Summary", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/dashboard/summary" } }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const body = pm.response.json();", "const stocked = body.data && body.data.find(product => Number(product.totalStock) > 0);", "if (stocked) pm.environment.set('productId', stocked.id);"] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/products?page=1&pageSize=25&search=", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "25" }, { "key": "search", "value": "" }] } }
+        },
+        {
+          "name": "Create Product",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Product created', function () { pm.response.to.have.status(201); });", "const body = pm.response.json();", "if (body.data && body.data.id) pm.environment.set('createdProductId', body.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"sku\": \"POSTMAN-001\",\n  \"barcode\": \"629000000001\",\n  \"name\": \"Postman Test Product\",\n  \"nameAr\": \"منتج اختبار\",\n  \"brand\": \"Demo\",\n  \"unit\": \"piece\",\n  \"type\": \"product\",\n  \"costPrice\": 100,\n  \"sellingPrice\": 150,\n  \"taxRate\": 14,\n  \"minStockLevel\": 5,\n  \"reorderLevel\": 10,\n  \"isActive\": true\n}" },
+            "url": "{{baseUrl}}/products"
+          }
+        },
+        { "name": "Get Product", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/products/{{createdProductId}}" } },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Postman Product\",\n  \"sellingPrice\": 175\n}" },
+            "url": "{{baseUrl}}/products/{{createdProductId}}"
+          }
+        },
+        { "name": "Delete Product", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/products/{{createdProductId}}" } }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        { "name": "List Customers", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/customers?page=1&pageSize=25" } },
+        {
+          "name": "Create Customer",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Customer created', function () { pm.response.to.have.status(201); });", "const body = pm.response.json();", "if (body.data && body.data.id) pm.environment.set('customerId', body.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"POST-CUST-001\",\n  \"name\": \"Postman Customer\",\n  \"nameAr\": \"عميل بوستمان\",\n  \"type\": \"retail\",\n  \"phone\": \"+201000000000\",\n  \"email\": \"postman.customer@example.com\",\n  \"city\": \"Cairo\",\n  \"creditLimit\": 10000,\n  \"paymentTerms\": 30,\n  \"tags\": [\"postman\"],\n  \"isActive\": true\n}" },
+            "url": "{{baseUrl}}/customers"
+          }
+        },
+        { "name": "Get Customer", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/customers/{{customerId}}" } },
+        {
+          "name": "Update Customer",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"creditLimit\": 20000\n}" }, "url": "{{baseUrl}}/customers/{{customerId}}" }
+        },
+        { "name": "Delete Customer", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/customers/{{customerId}}" } }
+      ]
+    },
+    {
+      "name": "Suppliers",
+      "item": [
+        { "name": "List Suppliers", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/suppliers?page=1&pageSize=25" } },
+        {
+          "name": "Create Supplier",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Supplier created', function () { pm.response.to.have.status(201); });", "const body = pm.response.json();", "if (body.data && body.data.id) pm.environment.set('supplierId', body.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"POST-SUP-001\",\n  \"name\": \"Postman Supplier\",\n  \"nameAr\": \"مورد بوستمان\",\n  \"type\": \"supplier\",\n  \"phone\": \"+201111111111\",\n  \"email\": \"postman.supplier@example.com\",\n  \"city\": \"Cairo\",\n  \"paymentTerms\": 30,\n  \"leadTime\": 7,\n  \"rating\": 4.5,\n  \"tags\": [\"postman\"],\n  \"isActive\": true\n}" },
+            "url": "{{baseUrl}}/suppliers"
+          }
+        },
+        { "name": "Get Supplier", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/suppliers/{{supplierId}}" } },
+        {
+          "name": "Update Supplier",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"rating\": 4.8\n}" }, "url": "{{baseUrl}}/suppliers/{{supplierId}}" }
+        },
+        { "name": "Delete Supplier", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/suppliers/{{supplierId}}" } }
+      ]
+    },
+    {
+      "name": "Sales",
+      "item": [
+        { "name": "List Invoices", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/sales/invoices" } },
+        {
+          "name": "Create Invoice",
+          "description": "Requires productId and customerId. Run List Products after seeding to select an in-stock product, then run Create Customer.",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Invoice created', function () { pm.response.to.have.status(201); });", "const body = pm.response.json();", "if (body.data && body.data.id) pm.environment.set('invoiceId', body.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"customerName\": \"Postman Customer\",\n  \"invoiceDate\": \"2026-07-15\",\n  \"dueDate\": \"2026-08-14\",\n  \"discountAmount\": 0,\n  \"paidAmount\": 171,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"description\": \"Postman Test Product\",\n      \"quantity\": 1,\n      \"unitPrice\": 150,\n      \"taxRate\": 14\n    }\n  ]\n}" },
+            "url": "{{baseUrl}}/sales/invoices"
+          }
+        },
+        { "name": "Get Invoice", "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/sales/invoices/{{invoiceId}}" } }
+      ]
+    }
+  ]
+}

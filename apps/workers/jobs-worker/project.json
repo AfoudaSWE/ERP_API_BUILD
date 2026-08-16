@@ -1,0 +1,48 @@
+{
+    "name":  "worker",
+    "$schema":  "../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "application",
+    "sourceRoot":  "apps/workers/jobs-worker/src",
+    "targets":  {
+                    "serve":  {
+                                  "executor":  "nx:run-commands",
+                                  "options":  {
+                                                  "command":  "tsx watch apps/workers/jobs-worker/src/main.ts"
+                                              }
+                              },
+                    "build":  {
+                                  "executor":  "nx:run-commands",
+                                  "outputs":  [
+                                                  "{workspaceRoot}/dist/apps/workers/jobs-worker"
+                                              ],
+                                  "options":  {
+                                                  "command":  "esbuild ./apps/workers/jobs-worker/src/main.ts --bundle --platform=node --format=cjs --outfile=./dist/apps/workers/jobs-worker/main.js",
+                                                  "cwd":  "{workspaceRoot}"
+                                              }
+                              },
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p apps/workers/jobs-worker/tsconfig.app.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint apps/workers/jobs-worker/src"
+                                             }
+                             },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run --config apps/workers/jobs-worker/vitest.config.ts"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:jobs",
+                 "platform:worker",
+                 "runtime:node",
+                 "type:app"
+             ]
+}

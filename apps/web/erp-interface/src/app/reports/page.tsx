@@ -1,0 +1,34 @@
+import Link from '@/components/router/Link';
+import { BarChart3, Building2, ChevronRight, Clock, FileText, Package, TrendingUp, Users, Wallet } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { useApiData } from '@/lib/api-data';
+import { cn, formatCurrency } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+
+export default function ReportsPage() {
+  const { i18n } = useTranslation();
+  const { dashboardStats: stats } = useApiData();
+  const locale = i18n.language.startsWith('ar') ? 'ar' : 'en';
+  const ar = locale === 'ar';
+  const money = (value: number) => formatCurrency(Number(value || 0), 'EGP', ar ? 'ar-EG' : 'en-EG');
+  const today = new Intl.DateTimeFormat(ar ? 'ar-EG' : 'en-EG', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date());
+  const groups = [
+    { title: ar ? 'تقارير المبيعات' : 'Sales reports', icon: TrendingUp, color: 'bg-blue-100 text-blue-600', reports: [[ar ? 'المبيعات اليومية' : 'Daily sales', '/reports/sales/daily'], [ar ? 'المبيعات الشهرية' : 'Monthly sales', '/reports/sales/monthly'], [ar ? 'المبيعات حسب المنتج' : 'Sales by product', '/reports/sales/by-product'], [ar ? 'المبيعات حسب العميل' : 'Sales by customer', '/reports/sales/by-customer'], [ar ? 'المبيعات حسب الفرع' : 'Sales by branch', '/reports/sales/by-branch'], [ar ? 'تحليل الربحية' : 'Profitability analysis', '/reports/sales/profitability']] },
+    { title: ar ? 'تقارير المخزون' : 'Inventory reports', icon: Package, color: 'bg-orange-100 text-orange-600', reports: [[ar ? 'رصيد المخزون' : 'Stock balance', '/reports/inventory/balance'], [ar ? 'تقييم المخزون' : 'Inventory valuation', '/reports/inventory/valuation'], [ar ? 'حركات المخزون' : 'Stock movements', '/reports/inventory/movements'], [ar ? 'المخزون المنخفض' : 'Low stock', '/reports/inventory/low-stock'], [ar ? 'المنتجات بطيئة الحركة' : 'Slow-moving products', '/reports/inventory/slow-moving'], [ar ? 'تقرير الانتهاء' : 'Expiry report', '/reports/inventory/expiry']] },
+    { title: ar ? 'التقارير المالية' : 'Financial reports', icon: Wallet, color: 'bg-green-100 text-green-600', reports: [[ar ? 'ميزان المراجعة' : 'Trial balance', '/reports/accounting/trial-balance'], [ar ? 'قائمة الدخل' : 'Income statement', '/reports/accounting/income-statement'], [ar ? 'الميزانية العمومية' : 'Balance sheet', '/reports/accounting/balance-sheet'], [ar ? 'التدفق النقدي' : 'Cash flow', '/reports/accounting/cash-flow'], [ar ? 'أعمار الذمم' : 'Aging report', '/reports/accounting/aging'], [ar ? 'تقرير الضرائب' : 'Tax report', '/reports/accounting/tax']] },
+    { title: ar ? 'تقارير العملاء' : 'Customer reports', icon: Users, color: 'bg-purple-100 text-purple-600', reports: [[ar ? 'كشف حساب العميل' : 'Customer statement', '/reports/customers/statement'], [ar ? 'أرصدة العملاء' : 'Customer balances', '/reports/customers/balances'], [ar ? 'تحليل العملاء' : 'Customer analysis', '/reports/customers/analysis'], [ar ? 'أفضل العملاء' : 'Top customers', '/reports/customers/top']] },
+    { title: ar ? 'تقارير المشتريات' : 'Purchase reports', icon: FileText, color: 'bg-teal-100 text-teal-600', reports: [[ar ? 'المشتريات حسب المورد' : 'Purchases by supplier', '/reports/purchases/by-supplier'], [ar ? 'أوامر الشراء المعلقة' : 'Pending purchase orders', '/reports/purchases/pending'], [ar ? 'تحليل الأسعار' : 'Price analysis', '/reports/purchases/prices'], [ar ? 'أداء الموردين' : 'Supplier performance', '/reports/purchases/supplier-performance']] },
+    { title: ar ? 'تقارير الموارد البشرية' : 'HR reports', icon: Building2, color: 'bg-pink-100 text-pink-600', reports: [[ar ? 'سجل الحضور' : 'Attendance log', '/reports/hr/attendance'], [ar ? 'ملخص الرواتب' : 'Payroll summary', '/reports/hr/payroll'], [ar ? 'العمل الإضافي' : 'Overtime report', '/reports/hr/overtime'], [ar ? 'رصيد الإجازات' : 'Leave balance', '/reports/hr/leaves']] },
+  ];
+  const quickReports = [
+    { name: ar ? 'المبيعات اليومية' : 'Daily sales', value: money(stats.salesToday), href: '/reports/sales/daily' },
+    { name: ar ? 'رصيد المخزون' : 'Stock balance', value: money(stats.inventoryValue), href: '/reports/inventory/balance' },
+    { name: ar ? 'أعمار ذمم العملاء' : 'Customer aging', value: money(stats.receivables), href: '/reports/accounting/aging' },
+  ];
+
+  return <AppLayout>
+    <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><h1 className="text-2xl font-bold text-navy-900 dark:text-white">{ar ? 'التقارير' : 'Reports'}</h1><p className="mt-1 text-navy-500 dark:text-navy-400">{ar ? 'إنشاء وعرض تقارير الأعمال' : 'Generate and view business reports'}</p></div><div className="flex items-center gap-3"><button type="button" className="btn btn-secondary btn-sm"><Clock className="h-4 w-4" />{ar ? 'التقارير المجدولة' : 'Scheduled reports'}</button><button type="button" className="btn btn-primary btn-sm"><BarChart3 className="h-4 w-4" />{ar ? 'تقرير مخصص' : 'Custom report'}</button></div></header>
+    <section className="card mb-8"><header className="card-header"><h2 className="font-semibold text-navy-900 dark:text-white">{ar ? 'التقارير السريعة' : 'Quick reports'}</h2></header><div className="divide-y divide-navy-100 dark:divide-navy-700">{quickReports.map((report) => <Link key={report.href} href={report.href} className="flex items-center justify-between p-4 transition-colors hover:bg-navy-50 dark:hover:bg-navy-800/50"><div className="flex items-center gap-3"><span className="rounded-lg bg-navy-100 p-2 dark:bg-navy-800"><FileText className="h-4 w-4 text-navy-600 dark:text-navy-400" /></span><div><p className="font-medium text-navy-900 dark:text-white">{report.name}</p><p className="text-sm text-navy-500">{today}</p></div></div><div className="flex items-center gap-3"><strong className="hidden text-sm text-navy-700 dark:text-navy-200 sm:block">{report.value}</strong><ChevronRight className={cn('h-4 w-4 text-navy-400', ar && 'rotate-180')} /></div></Link>)}</div></section>
+    <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">{groups.map((group) => { const Icon = group.icon; return <article key={group.title} className="card"><header className="flex items-center gap-3 border-b border-navy-200 p-4 dark:border-navy-700"><span className={cn('rounded-lg p-2', group.color)}><Icon className="h-6 w-6" /></span><h2 className="font-semibold text-navy-900 dark:text-white">{group.title}</h2></header><div className="p-2">{group.reports.map(([name, href]) => <Link key={href} href={href} className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-navy-600 transition-colors hover:bg-navy-100 dark:text-navy-300 dark:hover:bg-navy-800"><span>{name}</span><ChevronRight className={cn('h-4 w-4 text-navy-400', ar && 'rotate-180')} /></Link>)}</div></article>; })}</section>
+  </AppLayout>;
+}

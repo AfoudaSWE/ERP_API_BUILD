@@ -1,0 +1,4 @@
+interface:
+  display_name: "DevOps Delivery"
+  short_description: "Build secure CI/CD and deployment workflows"
+  default_prompt: "Use $devops-delivery to implement and validate delivery automation for this repository."

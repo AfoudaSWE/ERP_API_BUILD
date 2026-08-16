@@ -1,0 +1,5 @@
+import { AlertTriangle, RotateCcw } from 'lucide-react';
+
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return <main className="flex min-h-screen items-center justify-center bg-navy-50 p-6 dark:bg-navy-950"><div className="card max-w-lg p-8 text-center"><span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-danger-50 text-danger-600 dark:bg-danger-900/30"><AlertTriangle className="h-7 w-7" /></span><h1 className="mt-5 text-xl font-bold text-navy-900 dark:text-white">تعذر تحميل الصفحة</h1><p className="mt-2 text-navy-500 dark:text-navy-400">حدث خطأ غير متوقع. يمكنك المحاولة مرة أخرى دون فقدان موقعك الحالي.</p>{import.meta.env.DEV && <pre className="mt-4 overflow-auto rounded-lg bg-navy-950 p-3 text-start text-xs text-red-300" dir="ltr">{error.message}</pre>}<button onClick={reset} className="btn btn-primary btn-md mt-6"><RotateCcw className="h-4 w-4" />إعادة المحاولة</button></div></main>;
+}

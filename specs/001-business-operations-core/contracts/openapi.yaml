@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  title: SME ERP Business Operations Core API
+  version: 1.0.0
+  description: Contract outline for feature 001. All paths are authenticated and company-scoped.
+servers:
+  - url: /api
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 16, maxLength: 128 }
+  schemas:
+    Decimal:
+      type: string
+      pattern: '^-?(0|[1-9][0-9]*)(\.[0-9]+)?$'
+      examples: ['1250.00']
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+    ActionResult:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [id, status]
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string }
+            operationKey: { type: string }
+    WarehouseInput:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string, maxLength: 30 }
+        name: { type: string, maxLength: 120 }
+        nameAr: { type: string, maxLength: 120 }
+        warehouseType: { enum: [main, transit, returns, damaged] }
+        isActive: { type: boolean }
+    PurchaseOrderInput:
+      type: object
+      required: [supplierId, warehouseId, orderDate, currency, items]
+      properties:
+        supplierId: { type: string, format: uuid }
+        warehouseId: { type: string, format: uuid }
+        orderDate: { type: string, format: date }
+        expectedDate: { type: string, format: date }
+        currency: { type: string, pattern: '^[A-Z]{3}$' }
+        discountAmount: { $ref: '#/components/schemas/Decimal' }
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [productId, description, quantity, unitPrice, taxRate]
+            properties:
+              productId: { type: string, format: uuid }
+              description: { type: string }
+              quantity: { $ref: '#/components/schemas/Decimal' }
+              unit: { type: string }
+              unitPrice: { $ref: '#/components/schemas/Decimal' }
+              taxRate: { $ref: '#/components/schemas/Decimal' }
+    ReceiptInput:
+      type: object
+      required: [receiptDate, items]
+      properties:
+        receiptDate: { type: string, format: date }
+        supplierReference: { type: string }
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [purchaseOrderItemId, acceptedQuantity]
+            properties:
+              purchaseOrderItemId: { type: string, format: uuid }
+              acceptedQuantity: { $ref: '#/components/schemas/Decimal' }
+    PurchaseActionInput:
+      type: object
+      required: [action]
+      properties:
+        action: { enum: [submit, approve, reject, cancel, close] }
+        reason: { type: string, maxLength: 500 }
+paths:
+  /warehouses:
+    get: { summary: List warehouses, x-permission: inventory.read, responses: { '200': { description: OK } } }
+    post:
+      summary: Create warehouse
+      operationId: createWarehouse
+      x-permission: inventory.write
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/WarehouseInput' } } } }
+      responses: { '201': { description: Created }, '400': { description: Validation error } }
+  /inventory/availability:
+    get: { summary: List product availability by warehouse, x-permission: inventory.read, responses: { '200': { description: OK } } }
+  /inventory/movements:
+    get: { summary: Search immutable stock movements, x-permission: inventory.read, responses: { '200': { description: OK } } }
+  /inventory/adjustments:
+    post:
+      summary: Post a reasoned stock adjustment
+      x-permission: inventory.write
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses: { '201': { description: Posted }, '409': { description: Conflict } }
+  /purchase-orders:
+    get: { summary: List purchase orders, x-permission: purchases.read, responses: { '200': { description: OK } } }
+    post:
+      summary: Create purchase order
+      x-permission: purchases.write
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PurchaseOrderInput' } } } }
+      responses: { '201': { description: Created }, '409': { description: Duplicate/conflict } }
+  /purchase-orders/{id}/actions:
+    post:
+      summary: Submit, approve, reject, cancel, or close a purchase order
+      x-permission: purchases.write
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PurchaseActionInput' } } } }
+      responses: { '200': { description: Transitioned }, '409': { description: Invalid transition } }
+  /purchase-orders/{id}/receipts:
+    post:
+      summary: Post a full or partial goods receipt
+      x-permission: inventory.write
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ReceiptInput' } } } }
+      responses: { '201': { description: Posted }, '409': { description: Quantity/state conflict } }
+  /sales/invoices/{id}/payments:
+    post:
+      summary: Post and allocate a customer payment
+      x-permission: sales.write
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      responses: { '201': { description: Posted }, '409': { description: Allocation conflict } }
+  /sales/invoices/{id}/returns:
+    post:
+      summary: Post an eligible sales return
+      x-permission: sales.write
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      responses: { '201': { description: Posted }, '409': { description: Return conflict } }
+  /accounting/accounts:
+    get: { summary: List chart of accounts, x-permission: accounting.read, responses: { '200': { description: OK } } }
+    post: { summary: Create ledger account, x-permission: accounting.write, responses: { '201': { description: Created } } }
+  /accounting/journals:
+    get: { summary: List and drill into journals, x-permission: accounting.read, responses: { '200': { description: OK } } }
+    post:
+      summary: Create a balanced manual journal draft
+      x-permission: accounting.write
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses: { '201': { description: Created }, '400': { description: Unbalanced } }
+  /accounting/journals/{id}/{action}:
+    post:
+      summary: Post or reverse a journal
+      x-permission: accounting.write
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: action, in: path, required: true, schema: { enum: [post, reverse] } }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      responses: { '200': { description: Completed }, '409': { description: State/period conflict } }
+  /accounting/periods/{id}/{action}:
+    post:
+      summary: Close or reopen an accounting period
+      x-permission: accounting.write
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: action, in: path, required: true, schema: { enum: [close, reopen] } }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      responses: { '200': { description: Completed }, '409': { description: Conflict } }
+  /finance/accounts:
+    get: { summary: List cash and bank accounts, x-permission: cash.read, responses: { '200': { description: OK } } }
+    post: { summary: Create financial account, x-permission: cash.write, responses: { '201': { description: Created } } }
+  /finance/transfers:
+    post:
+      summary: Post a linked account transfer
+      x-permission: cash.write
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses: { '201': { description: Posted }, '409': { description: Balance/state conflict } }
+  /expenses/{id}/{action}:
+    post:
+      summary: Submit, approve, reject, pay, or cancel an expense
+      x-permission: expenses.write
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: action, in: path, required: true, schema: { enum: [submit, approve, reject, pay, cancel] } }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      responses: { '200': { description: Completed }, '409': { description: Invalid transition } }
+  /finance/reconciliations:
+    post:
+      summary: Create a reconciliation and statement lines
+      x-permission: cash.write
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses: { '201': { description: Created } }
+  /reports/{reportKey}:
+    get:
+      summary: Run an authorized source-drillable report
+      x-permission: reports.read
+      parameters:
+        - { name: reportKey, in: path, required: true, schema: { type: string } }
+        - { name: from, in: query, required: true, schema: { type: string, format: date } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date } }
+      responses: { '200': { description: Report summary and drill-down rows } }
+  /audit:
+    get: { summary: Search immutable audit events, x-permission: audit.read, responses: { '200': { description: OK } } }

@@ -1,0 +1,6 @@
+CREATE TABLE accounting_periods(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),company_id uuid NOT NULL REFERENCES companies(id) ON DELETE RESTRICT,start_date date NOT NULL,end_date date NOT NULL,status text NOT NULL DEFAULT 'open' CHECK(status IN('open','closed')),close_note text,closed_by uuid REFERENCES users(id) ON DELETE SET NULL,closed_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),CHECK(start_date<=end_date),UNIQUE(company_id,start_date,end_date));
+ALTER TABLE journal_entries ADD COLUMN IF NOT EXISTS reversal_of_id uuid REFERENCES journal_entries(id) ON DELETE RESTRICT;
+DROP TRIGGER IF EXISTS posted_journal_immutable ON journal_entries;
+CREATE OR REPLACE FUNCTION protect_posted_journal() RETURNS trigger AS $$ BEGIN IF TG_OP='DELETE' THEN RAISE EXCEPTION 'immutable business record cannot be deleted'; END IF; IF OLD.status='posted' AND NEW.status='reversed' AND NEW.reversed_by_id IS NOT NULL THEN RETURN NEW; END IF; IF OLD.status IN('posted','reversed') THEN RAISE EXCEPTION 'immutable business record cannot be changed'; END IF; RETURN NEW; END; $$ LANGUAGE plpgsql;
+CREATE TRIGGER posted_journal_immutable BEFORE UPDATE OR DELETE ON journal_entries FOR EACH ROW EXECUTE FUNCTION protect_posted_journal();
+CREATE INDEX idx_period_company_dates ON accounting_periods(company_id,start_date,end_date);

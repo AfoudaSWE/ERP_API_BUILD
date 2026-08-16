@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@erp/contracts": ["libs/shared/contracts/src/index.ts"],
+      "@erp/commerce-catalog-contracts": ["libs/domains/commerce/catalog/contracts/src/index.ts"],
+      "@erp/commerce-catalog-application": ["libs/domains/commerce/catalog/backend/application/src/index.ts"],
+      "@erp/commerce-storefront-contracts": ["libs/domains/commerce/storefront/contracts/src/index.ts"],
+      "@erp/commerce-storefront-data-access": ["libs/domains/commerce/storefront/data-access/src/index.ts"],
+      "@erp/commerce-storefront-ui": ["libs/domains/commerce/storefront/ui/src/index.tsx"],
+      "@erp/shared-frontend-auth": ["libs/frontend/auth/src/index.tsx"],
+      "@erp/shared-frontend-data-access": ["libs/frontend/data-access/src/index.ts"],
+      "@erp/shared-backend-database": ["libs/backend/database/src/index.ts"],
+      "@erp/jobs-contracts": ["libs/backend/jobs/contracts/src/index.ts"],
+      "@erp/jobs-core": ["libs/backend/jobs/core/src/index.ts"],
+      "@erp/jobs-producers": ["libs/backend/jobs/producers/src/index.ts"],
+      "@erp/jobs-processors": ["libs/backend/jobs/processors/src/index.ts"]
+    }
+  }
+}

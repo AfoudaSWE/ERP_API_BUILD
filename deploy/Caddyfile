@@ -1,0 +1,14 @@
+{$ERP_DOMAIN} {
+  encode zstd gzip
+  @api path /api/* /sitemap.xml /robots.txt
+  reverse_proxy @api api:3333
+  reverse_proxy web:8080
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    -Server
+  }
+  log {
+    output stdout
+    format json
+  }
+}

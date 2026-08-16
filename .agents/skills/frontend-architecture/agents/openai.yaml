@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Architecture"
+  short_description: "Build scalable and accessible frontend systems"
+  default_prompt: "Use $frontend-architecture to implement a maintainable frontend feature in this repository."

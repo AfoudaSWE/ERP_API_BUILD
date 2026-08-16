@@ -1,0 +1,4 @@
+interface:
+  display_name: "E-commerce Domain"
+  short_description: "Implement robust commerce business workflows"
+  default_prompt: "Use $ecommerce-domain to implement a production-ready commerce workflow in this repository."

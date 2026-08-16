@@ -1,0 +1,1 @@
+import path from'node:path';import{defineConfig}from'vitest/config';export default defineConfig({resolve:{alias:{'@erp/commerce-storefront-contracts':path.resolve(__dirname,'../contracts/src/index.ts')}},test:{include:['libs/domains/commerce/storefront/ui/src/**/*.test.tsx'],environment:'node'}});

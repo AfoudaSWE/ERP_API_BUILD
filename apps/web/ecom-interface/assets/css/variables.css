@@ -1,0 +1,39 @@
+:root {
+  --color-primary: hsl(75.75deg 69.57% 45.1%);
+  --color-primary-dark: hsl(75.75deg 69.57% 35%);
+  --color-primary-soft: hsl(75.75deg 69.57% 92%);
+  --color-secondary: #000000;
+  --color-accent: hsl(75.75deg 76% 58%);
+  --color-background: #ffffff;
+  --color-background-soft: #f6f6f8;
+  --color-surface: #ffffff;
+  --color-surface-dark: #15151b;
+  --color-text: #111318;
+  --color-text-inverse: #ffffff;
+  --color-text-muted: #6f737c;
+  --color-border: #e6e7eb;
+  --color-success: #178a52;
+  --color-danger: #d92d20;
+  --shadow-sm: 0 8px 30px rgba(12, 14, 18, .06);
+  --shadow-md: 0 18px 50px rgba(12, 14, 18, .10);
+  --shadow-lg: 0 34px 90px rgba(0, 0, 0, .22);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 36px;
+  --radius-pill: 999px;
+  --container: 1440px;
+  --gutter: 32px;
+  --header-height: 82px;
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --transition-fast: 160ms var(--ease);
+  --transition: 280ms var(--ease);
+  --transition-slow: 600ms var(--ease);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gutter: 16px;
+    --header-height: 68px;
+  }
+}

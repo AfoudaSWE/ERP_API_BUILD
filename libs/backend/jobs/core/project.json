@@ -1,0 +1,31 @@
+{
+    "name":  "jobs-core",
+    "$schema":  "../../../../node_modules/nx/schemas/project-schema.json",
+    "projectType":  "library",
+    "sourceRoot":  "libs/backend/jobs/core/src",
+    "targets":  {
+                    "typecheck":  {
+                                      "executor":  "nx:run-commands",
+                                      "options":  {
+                                                      "command":  "tsc --noEmit -p libs/backend/jobs/core/tsconfig.json"
+                                                  }
+                                  },
+                    "lint":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "eslint libs/backend/jobs/core/src"
+                                             }
+                             },
+                    "test":  {
+                                 "executor":  "nx:run-commands",
+                                 "options":  {
+                                                 "command":  "vitest run libs/backend/jobs/core/src"
+                                             }
+                             }
+                },
+    "tags":  [
+                 "scope:jobs",
+                 "platform:backend",
+                 "type:infrastructure"
+             ]
+}

@@ -65,6 +65,13 @@ authRouter.post('/signup', async (request, response) => {
   if (existing.rowCount) {
     throw new HttpError(409, 'EMAIL_IN_USE', 'This email is already registered');
   }
+  const existingCompany = await query(
+    'SELECT 1 FROM companies WHERE lower(btrim(name))=lower(btrim($1))',
+    [input.companyName],
+  );
+  if (existingCompany.rowCount) {
+    throw new HttpError(409, 'COMPANY_NAME_IN_USE', 'This company name is already registered');
+  }
   const passwordHash = await bcrypt.hash(input.password, 12);
   const user = await transaction(async (client) => {
     const tenant = (

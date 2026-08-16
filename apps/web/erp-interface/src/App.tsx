@@ -33,6 +33,7 @@ import { ReportRoutePage } from "@/components/shared/ReportRoutePage";
 import { SettingsSectionPage } from "@/components/shared/SettingsSectionPage";
 import LoginPage from "@/app/login/page";
 import SignupPage from "@/app/signup/page";
+import PlatformAdminPage from "@/app/platform-admin/page";
 import { useAuth } from "@/lib/auth";
 import { ApiDataProvider } from "@/lib/api-data";
 import RolesPage from "@/app/settings/roles-page";
@@ -435,6 +436,14 @@ export default function App() {
             }
           />
           <Route path="/settings/roles" element={<RolesPage />} />
+          <Route
+            path="/platform-admin"
+            element={
+              <PermissionRoute permission="companies.manage">
+                <PlatformAdminPage />
+              </PermissionRoute>
+            }
+          />
           <Route
             path="/settings/:section"
             element={

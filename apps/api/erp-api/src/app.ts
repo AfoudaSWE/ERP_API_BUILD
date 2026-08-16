@@ -29,6 +29,7 @@ import { attendanceRouter } from "./features/attendance/routes.js";
 import { hrRouter } from "./features/hr/routes.js";
 import { reportsRouter } from "./features/reports/routes.js";
 import { payrollRouter } from "./features/payroll/routes.js";
+import { platformRouter } from "./features/platform/routes.js";
 import { pool } from "./db/client.js";
 
 let acceptingTraffic = true;
@@ -90,6 +91,7 @@ export function createApp() {
   app.use("/api/hr", hrRouter);
   app.use("/api/reports", reportsRouter);
   app.use("/api/payroll", payrollRouter);
+  app.use("/api/platform", platformRouter);
   app.use("/api/categories", categoriesRouter);
   app.use("/api", partiesRouter);
   app.use("/api/sales", salesRouter);

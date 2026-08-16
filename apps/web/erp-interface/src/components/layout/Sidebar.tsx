@@ -4,7 +4,7 @@ import {
   LayoutDashboard, ShoppingCart, Store, ShoppingBag, Package,
   Users, Truck, Calculator, Receipt, Wallet, UserCog, Clock, Banknote,
   BarChart3, Settings, ChevronLeft, ChevronRight, Sparkles, Menu, X,
-  Boxes, Building, UserPlus,
+  Boxes, Building, UserPlus, ShieldAlert,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Locale } from '@/lib/i18n';
@@ -46,6 +46,7 @@ export const navItems: NavItem[] = [
   { href: '/reports', icon: <BarChart3 className="h-5 w-5" />, labelKey: 'nav.reports', permission: 'reports.read' },
   { href: '/branches', icon: <Building className="h-5 w-5" />, labelKey: 'nav.branches', permission: 'branches.read' },
   { href: '/settings', icon: <Settings className="h-5 w-5" />, labelKey: 'nav.settings', permission: 'settings.read' },
+  { href: '/platform-admin', icon: <ShieldAlert className="h-5 w-5" />, labelKey: 'nav.platformAdmin', permission: 'companies.manage' },
 ];
 
 export function visibleNavItems(can: (permission: string) => boolean) {

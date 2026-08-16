@@ -27,7 +27,7 @@ export async function authenticate(request: Request, _response: Response, next: 
         [companyId],
       )
     ).rows[0];
-    if (subscription) {
+    if (subscription && current[0].role !== 'super_admin') {
       if (subscription.subscription_status === 'suspended' || subscription.subscription_status === 'canceled') {
         return next(new HttpError(402, 'SUBSCRIPTION_INACTIVE', 'This company subscription is not active'));
       }

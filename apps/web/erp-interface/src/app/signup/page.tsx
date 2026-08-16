@@ -4,12 +4,41 @@ import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
 import Link from '@/components/router/Link';
 
+function slugForEmail(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 export default function SignupPage() {
   const { signup } = useAuth();
   const { i18n } = useTranslation();
   const ar = i18n.language.startsWith('ar');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailEdited, setEmailEdited] = useState(false);
+
+  function suggestEmail(nextName: string, nextCompanyName: string) {
+    const local = slugForEmail(nextName.split(/\s+/)[0] ?? '');
+    const domain = slugForEmail(nextCompanyName);
+    if (!local || !domain) return '';
+    return `${local}@${domain}.com`;
+  }
+
+  function onNameChange(value: string) {
+    setName(value);
+    if (!emailEdited) setEmail(suggestEmail(value, companyName));
+  }
+
+  function onCompanyNameChange(value: string) {
+    setCompanyName(value);
+    if (!emailEdited) setEmail(suggestEmail(name, value));
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,7 +93,17 @@ export default function SignupPage() {
         <form onSubmit={submit} className="space-y-5">
           <div>
             <label className="label" htmlFor="companyName">{ar ? 'اسم الشركة' : 'Company name'}</label>
-            <input id="companyName" name="companyName" type="text" className="input" required minLength={2} maxLength={120} />
+            <input
+              id="companyName"
+              name="companyName"
+              type="text"
+              className="input"
+              required
+              minLength={2}
+              maxLength={120}
+              value={companyName}
+              onChange={(e) => onCompanyNameChange(e.target.value)}
+            />
           </div>
           <div>
             <label className="label" htmlFor="companyNameAr">{ar ? 'اسم الشركة بالعربية (اختياري)' : 'Company name in Arabic (optional)'}</label>
@@ -72,11 +111,34 @@ export default function SignupPage() {
           </div>
           <div>
             <label className="label" htmlFor="name">{ar ? 'اسمك' : 'Your name'}</label>
-            <input id="name" name="name" type="text" className="input" required minLength={2} maxLength={120} />
+            <input
+              id="name"
+              name="name"
+              type="text"
+              className="input"
+              required
+              minLength={2}
+              maxLength={120}
+              value={name}
+              onChange={(e) => onNameChange(e.target.value)}
+            />
           </div>
           <div>
             <label className="label" htmlFor="email">{ar ? 'البريد الإلكتروني' : 'Email'}</label>
-            <input id="email" name="email" type="email" className="input" required autoComplete="email" />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className="input"
+              required
+              autoComplete="email"
+              placeholder={ar ? 'مثال: ahmed@malekstore.com' : 'e.g. ahmed@malekstore.com'}
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setEmailEdited(true); }}
+            />
+            <p className="mt-1 text-xs text-navy-400">
+              {ar ? 'اقترحناه من اسمك واسم الشركة — عدّله لو حابب.' : 'Suggested from your name and company — edit it if you like.'}
+            </p>
           </div>
           <div>
             <label className="label" htmlFor="password">{ar ? 'كلمة المرور' : 'Password'}</label>

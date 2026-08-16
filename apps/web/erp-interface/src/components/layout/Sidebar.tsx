@@ -49,7 +49,8 @@ export const navItems: NavItem[] = [
   { href: '/platform-admin', icon: <ShieldAlert className="h-5 w-5" />, labelKey: 'nav.platformAdmin', permission: 'companies.manage' },
 ];
 
-export function visibleNavItems(can: (permission: string) => boolean) {
+export function visibleNavItems(can: (permission: string) => boolean, role?: string) {
+  if (role === 'super_admin') return navItems.filter((item) => item.href === '/platform-admin');
   return navItems.filter((item) => can(item.permission));
 }
 
@@ -61,7 +62,7 @@ export function Sidebar({
   onMobileClose,
 }: SidebarProps) {
   const { pathname } = useLocation();
-  const { can } = useAuth();
+  const { can, user } = useAuth();
   const { t } = useTranslation();
   const isRTL = locale === 'ar';
   const expandedLabel = isRTL ? 'توسيع القائمة' : 'Expand sidebar';
@@ -118,7 +119,7 @@ export function Sidebar({
         </div>
 
         <nav className="sidebar-nav flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {visibleNavItems(can).map((item) => {
+          {visibleNavItems(can, user?.role).map((item) => {
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
             return (

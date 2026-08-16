@@ -183,6 +183,15 @@ export default function App() {
         </Routes>
       </AppErrorBoundary>
     );
+  if (user.role === "super_admin")
+    return (
+      <AppErrorBoundary>
+        <Routes>
+          <Route path="/platform-admin" element={<PlatformAdminPage />} />
+          <Route path="*" element={<Navigate to="/platform-admin" replace />} />
+        </Routes>
+      </AppErrorBoundary>
+    );
   return (
     <AppErrorBoundary>
       <ApiDataProvider>
@@ -436,14 +445,6 @@ export default function App() {
             }
           />
           <Route path="/settings/roles" element={<RolesPage />} />
-          <Route
-            path="/platform-admin"
-            element={
-              <PermissionRoute permission="companies.manage">
-                <PlatformAdminPage />
-              </PermissionRoute>
-            }
-          />
           <Route
             path="/settings/:section"
             element={

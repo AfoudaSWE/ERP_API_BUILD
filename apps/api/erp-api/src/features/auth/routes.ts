@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { z } from 'zod';
-import { loginSchema } from '@erp/contracts';
+import { loginSchema, signupSchema } from '@erp/contracts';
 import { env } from '../../config/env.js';
 import { query, transaction } from '../../db/client.js';
 import { HttpError, validate } from '../../lib/http.js';
@@ -16,7 +16,7 @@ export const authRouter = Router();
 const refreshSchema = z.object({ refreshToken: z.string().min(32).max(512) });
 const tokenHash = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
 const newRefreshToken = () => crypto.randomBytes(48).toString('base64url');
-function signAccessToken(user: UserRow) {
+function signAccessToken(user: Pick<UserRow, 'id' | 'tenant_id' | 'company_id' | 'role' | 'permissions'>) {
   const options: SignOptions = { expiresIn: env.JWT_EXPIRES_IN as SignOptions['expiresIn'] };
   return jwt.sign(
     { tenantId: user.tenant_id, companyId: user.company_id, role: user.role, permissions: user.permissions },
@@ -52,6 +52,56 @@ authRouter.post('/login', async (request, response) => {
   );
   const safeUser = { id: user.id, tenant_id: user.tenant_id, company_id: user.company_id, email: user.email, name: user.name, role: user.role, permissions: user.permissions };
   response.json({ data: { accessToken, refreshToken, user: serializeRow(safeUser) } });
+});
+
+function slugify(name: string) {
+  const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'company';
+  return `${base}-${crypto.randomBytes(3).toString('hex')}`;
+}
+
+authRouter.post('/signup', async (request, response) => {
+  const input = validate(signupSchema, request.body);
+  const existing = await query('SELECT 1 FROM users WHERE lower(email)=lower($1)', [input.email]);
+  if (existing.rowCount) {
+    throw new HttpError(409, 'EMAIL_IN_USE', 'This email is already registered');
+  }
+  const passwordHash = await bcrypt.hash(input.password, 12);
+  const user = await transaction(async (client) => {
+    const tenant = (
+      await client.query<{ id: string }>(
+        `INSERT INTO tenants(name,slug)VALUES($1,$2)RETURNING id`,
+        [input.companyName, slugify(input.companyName)],
+      )
+    ).rows[0];
+    const company = (
+      await client.query<{ id: string }>(
+        `INSERT INTO companies(tenant_id,name,name_ar,subscription_status,trial_ends_at)
+         VALUES($1,$2,$3,'trial',now()+($4 || ' days')::interval)RETURNING id`,
+        [tenant.id, input.companyName, input.companyNameAr, env.SIGNUP_TRIAL_DAYS],
+      )
+    ).rows[0];
+    const createdUser = (
+      await client.query<{ id: string; tenant_id: string; company_id: string; email: string; name: string; role: string }>(
+        `INSERT INTO users(tenant_id,company_id,email,password_hash,name,role)
+         VALUES($1,$2,lower($3),$4,$5,'company_owner')RETURNING id,tenant_id,company_id,email,name,role`,
+        [tenant.id, company.id, input.email, passwordHash, input.name],
+      )
+    ).rows[0];
+    return createdUser;
+  });
+  const permissions = (
+    await query<{ permission_code: string }>('SELECT permission_code FROM role_permissions WHERE role=$1', [user.role])
+  ).rows.map((row) => row.permission_code);
+  const fullUser = { ...user, permissions };
+  const accessToken = signAccessToken(fullUser);
+  const refreshToken = newRefreshToken();
+  await query(
+    `INSERT INTO auth_refresh_tokens(user_id,tenant_id,token_hash,family_id,expires_at)
+     VALUES($1,$2,$3,gen_random_uuid(),now()+($4 || ' days')::interval)`,
+    [user.id, user.tenant_id, tokenHash(refreshToken), env.REFRESH_TOKEN_DAYS],
+  );
+  const safeUser = { id: user.id, tenant_id: user.tenant_id, company_id: user.company_id, email: user.email, name: user.name, role: user.role, permissions };
+  response.status(201).json({ data: { accessToken, refreshToken, user: serializeRow(safeUser) } });
 });
 
 authRouter.post('/refresh', async (request, response) => {

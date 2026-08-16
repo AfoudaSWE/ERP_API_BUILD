@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { LockKeyhole, LogIn } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
+import Link from '@/components/router/Link';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -33,6 +34,12 @@ export default function LoginPage() {
         <div><label className="label" htmlFor="password">{t('auth.password')}</label><input id="password" name="password" type="password" className="input" required minLength={8} autoComplete="current-password" defaultValue="Demo1234!" /></div>
         <button type="submit" disabled={loading} className="btn btn-primary btn-md w-full justify-center"><LogIn className="h-4 w-4" />{loading ? t('auth.signingIn') : t('auth.signIn')}</button>
       </form>
+      <p className="mt-5 text-center text-sm text-navy-500">
+        {i18n.language.startsWith('ar') ? 'شركة جديدة؟' : 'New company?'}{' '}
+        <Link href="/signup" className="text-primary-600 hover:underline">
+          {i18n.language.startsWith('ar') ? 'ابدأ تجربة مجانية' : 'Start a free trial'}
+        </Link>
+      </p>
     </section>
   </main>;
 }

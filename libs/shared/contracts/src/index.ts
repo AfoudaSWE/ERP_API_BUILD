@@ -34,6 +34,14 @@ export const loginSchema = z.object({
   tenantId: z.uuid().optional(),
 });
 
+export const signupSchema = z.object({
+  companyName: z.string().trim().min(2).max(120),
+  companyNameAr: z.string().trim().max(120).default(''),
+  name: z.string().trim().min(2).max(120),
+  email: z.email(),
+  password: z.string().min(8).max(200),
+});
+
 export const customerInputSchema = z.object({
   code: z.string().min(1).max(30),
   name: z.string().min(2).max(160),
@@ -98,6 +106,7 @@ export const salesInvoiceInputSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
+export type SignupInput = z.infer<typeof signupSchema>;
 export type CustomerInput = z.infer<typeof customerInputSchema>;
 export type SupplierInput = z.infer<typeof supplierInputSchema>;
 export type LeadInput = z.infer<typeof leadInputSchema>;

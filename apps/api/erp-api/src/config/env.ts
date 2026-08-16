@@ -9,6 +9,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32).default('local-development-secret-change-me-now'),
   JWT_EXPIRES_IN: z.string().default('8h'),
   REFRESH_TOKEN_DAYS: z.coerce.number().int().positive().max(90).default(14),
+  SIGNUP_TRIAL_DAYS: z.coerce.number().int().positive().max(365).default(14),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   TRUST_PROXY: z.coerce.number().int().min(0).max(3).default(0),
   DB_POOL_MAX: z.coerce.number().int().positive().max(100).default(10),

@@ -33,6 +33,7 @@ import { OperationsPage } from "@/components/shared/OperationsPage";
 import { ReportRoutePage } from "@/components/shared/ReportRoutePage";
 import { SettingsSectionPage } from "@/components/shared/SettingsSectionPage";
 import LoginPage from "@/app/login/page";
+import SignupPage from "@/app/signup/page";
 import { useAuth } from "@/lib/auth";
 import { ApiDataProvider } from "@/lib/api-data";
 import RolesPage from "@/app/settings/roles-page";
@@ -169,6 +170,7 @@ export default function App() {
     return (
       <Routes>
         <Route path="/attendance-portal" element={<AttendancePortalLogin />} />
+        <Route path="/signup" element={<SignupPage />} />
         <Route path="*" element={<LoginPage />} />
       </Routes>
     );

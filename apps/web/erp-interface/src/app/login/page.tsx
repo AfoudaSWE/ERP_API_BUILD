@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { LockKeyhole, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
 import Link from '@/components/router/Link';
@@ -27,56 +27,40 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout>
-      <div className="mb-6 flex justify-end">
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={() => void i18n.changeLanguage(ar ? 'en' : 'ar')}
-        >
-          {ar ? 'English' : 'العربية'}
-        </button>
-      </div>
-      <div className="card p-8">
-        <div className="mb-7 flex items-center gap-3">
-          <div className="rounded-xl bg-primary-600 p-3 text-white">
-            <LockKeyhole className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-navy-900 dark:text-white">
-              {ar ? 'تسجيل الدخول' : 'Welcome back'}
-            </h1>
-            <p className="text-sm text-navy-500">
-              {ar ? 'سجّل الدخول لمتابعة عملك' : 'Sign in to pick up where you left off'}
-            </p>
-          </div>
+    <AuthLayout
+      meta={ar ? 'دخول آمن' : 'SECURE ACCESS'}
+      headline={ar ? <>مرحبًا بيك<br />تاني.</> : <>Welcome<br />back.</>}
+    >
+      {error && (
+        <div role="alert" className="mb-6 rounded-lg border border-danger-500/30 bg-danger-500/10 p-3 text-sm text-danger-400">
+          {error}
         </div>
-        {error && (
-          <div role="alert" className="mb-5 rounded-lg bg-danger-50 p-3 text-sm text-danger-700">
-            {error}
-          </div>
-        )}
-        <form onSubmit={submit} className="space-y-5">
-          <div>
-            <label className="label" htmlFor="email">{ar ? 'البريد الإلكتروني' : 'Email'}</label>
-            <input id="email" name="email" type="email" className="input" required autoComplete="email" defaultValue="owner@demo.erp" />
-          </div>
-          <div>
-            <label className="label" htmlFor="password">{ar ? 'كلمة المرور' : 'Password'}</label>
-            <input id="password" name="password" type="password" className="input" required minLength={8} autoComplete="current-password" defaultValue="Demo1234!" />
-          </div>
-          <button type="submit" disabled={loading} className="btn btn-primary btn-md w-full justify-center">
-            <LogIn className="h-4 w-4" />
-            {loading ? (ar ? 'جارٍ تسجيل الدخول…' : 'Signing in…') : (ar ? 'تسجيل الدخول' : 'Sign in')}
-          </button>
-        </form>
-        <p className="mt-6 text-center text-sm text-navy-500">
-          {ar ? 'شركة جديدة؟' : 'New company?'}{' '}
-          <Link href="/signup" className="font-medium text-primary-600 hover:underline">
-            {ar ? 'ابدأ تجربة مجانية' : 'Start a free trial'}
-          </Link>
-        </p>
-      </div>
+      )}
+      <form onSubmit={submit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="mb-2 block font-mono text-xs uppercase tracking-wider text-navy-400">
+            {ar ? 'البريد الإلكتروني' : 'Email'}
+          </label>
+          <input id="email" name="email" type="email" className="input" required autoComplete="email" defaultValue="owner@demo.erp" />
+        </div>
+        <div>
+          <label htmlFor="password" className="mb-2 block font-mono text-xs uppercase tracking-wider text-navy-400">
+            {ar ? 'كلمة المرور' : 'Password'}
+          </label>
+          <input id="password" name="password" type="password" className="input" required minLength={8} autoComplete="current-password" defaultValue="Demo1234!" />
+        </div>
+        <button type="submit" disabled={loading} className="btn btn-primary btn-md w-full justify-center">
+          <LogIn className="h-4 w-4" />
+          {loading ? (ar ? 'جارٍ تسجيل الدخول…' : 'Signing in…') : (ar ? 'تسجيل الدخول' : 'Sign in')}
+        </button>
+      </form>
+      <div className="my-6 border-t border-dashed border-navy-800" />
+      <p className="font-mono text-xs uppercase tracking-wider text-navy-500">
+        {ar ? 'شركة جديدة؟' : 'New company?'}{' '}
+        <Link href="/signup" className="text-white underline decoration-navy-600 underline-offset-4 hover:decoration-white">
+          {ar ? 'ابدأ تجربة مجانية' : 'Start a free trial'}
+        </Link>
+      </p>
     </AuthLayout>
   );
 }

@@ -220,10 +220,10 @@ export function Sidebar({
       >
         <div className="flex h-16 items-center justify-between gap-2 border-b border-navy-200 px-3 dark:border-navy-700">
           <div className={cn('flex min-w-0 items-center gap-2', isDesktopCollapsed && 'lg:hidden')}>
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-950 text-primary-100 dark:bg-primary-100 dark:text-primary-950">
+            {/* <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-950 text-primary-100 dark:bg-primary-100 dark:text-primary-950">
               <PanelsTopLeft className="h-5 w-5" />
-            </div>
-            <span className="truncate text-base font-bold tracking-[-0.02em] text-navy-950 dark:text-white">ClubGenies</span>
+            </div> */}
+            <span className="truncate text-base font-bold tracking-[-0.02em] text-navy-950 dark:text-white">Club Genies</span>
           </div>
 
           <div className={cn(

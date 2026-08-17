@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
+import Link from "@/components/router/Link";
 
 type Option = { id: string; name: string; nameAr?: string; isActive: boolean };
 type ManagerOption = { userId: string; employeeCode: string; name: string; nameAr: string };
@@ -233,6 +234,8 @@ export function EmployeeForm({
             rows={branches.filter((x) => x.isActive)}
             ar={ar}
             defaultChecked={employeeBranchIds}
+            emptyHref="/branches"
+            emptyLabel={ar ? "لا توجد فروع بعد. أضف فرعًا أولًا من صفحة الفروع." : "No branches yet. Add one from the Branches page first."}
           />
           <Checks
             name="workplaceIds"
@@ -240,6 +243,8 @@ export function EmployeeForm({
             rows={workplaces.filter((x) => x.isActive)}
             ar={ar}
             defaultChecked={employeeWorkplaceIds}
+            emptyHref="/attendance"
+            emptyLabel={ar ? "لا توجد مواقع عمل بعد. أضف موقعًا من تبويب مواقع العمل في صفحة الحضور." : "No workplaces yet. Add one from the Workplaces tab in Attendance."}
           />
         </FormSection>
 
@@ -311,29 +316,47 @@ function Checks({
   rows,
   ar,
   defaultChecked,
+  emptyHref,
+  emptyLabel,
 }: {
   name: string;
   label: string;
   rows: Option[];
   ar: boolean;
   defaultChecked: string[];
+  emptyHref?: string;
+  emptyLabel?: string;
 }) {
   return (
     <fieldset className="rounded-xl border p-3">
       <legend className="px-2 text-sm">{label}</legend>
-      <div className="max-h-32 space-y-2 overflow-y-auto">
-        {rows.map((x) => (
-          <label className="flex gap-2 text-sm" key={x.id}>
-            <input
-              type="checkbox"
-              name={name}
-              value={x.id}
-              defaultChecked={defaultChecked.includes(x.id)}
-            />
-            {ar ? x.nameAr || x.name : x.name}
-          </label>
-        ))}
-      </div>
+      {rows.length ? (
+        <div className="max-h-32 space-y-2 overflow-y-auto">
+          {rows.map((x) => (
+            <label className="flex gap-2 text-sm" key={x.id}>
+              <input
+                type="checkbox"
+                name={name}
+                value={x.id}
+                defaultChecked={defaultChecked.includes(x.id)}
+              />
+              {ar ? x.nameAr || x.name : x.name}
+            </label>
+          ))}
+        </div>
+      ) : (
+        <p className="p-2 text-sm text-navy-500">
+          {emptyLabel}
+          {emptyHref && (
+            <>
+              {" "}
+              <Link href={emptyHref} className="text-primary-600 underline">
+                {ar ? "فتح الصفحة" : "Open page"}
+              </Link>
+            </>
+          )}
+        </p>
+      )}
     </fieldset>
   );
 }

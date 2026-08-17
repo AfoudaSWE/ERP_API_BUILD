@@ -212,7 +212,7 @@ export function Sidebar({
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="truncate text-lg font-bold text-navy-900 dark:text-white">
-              {isRTL ? 'ClubGenies ERP' : 'ClubGenies ERP'}
+              {isRTL ? 'ERP' : 'ERP'}
             </span>
           </div>
 

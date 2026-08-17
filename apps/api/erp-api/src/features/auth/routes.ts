@@ -94,6 +94,10 @@ authRouter.post('/signup', async (request, response) => {
         [tenant.id, company.id, input.email, passwordHash, input.name],
       )
     ).rows[0];
+    await client.query(
+      `INSERT INTO branches(company_id,code,name,name_ar) VALUES($1,'MAIN','Main Branch',$2)`,
+      [company.id, input.companyNameAr ? `${input.companyNameAr} - الفرع الرئيسي` : 'الفرع الرئيسي'],
+    );
     return createdUser;
   });
   const permissions = (

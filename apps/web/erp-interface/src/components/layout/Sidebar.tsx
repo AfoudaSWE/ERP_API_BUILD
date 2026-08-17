@@ -218,16 +218,16 @@ export function Sidebar({
         )}
         aria-label={isRTL ? 'التنقل الرئيسي' : 'Main navigation'}
       >
-        <div className="flex h-16 items-center justify-between gap-2 border-b border-navy-200 px-3 dark:border-navy-700">
+        <div className="flex h-16 items-center justify-between gap-2 border-b border-navy-700 px-3 dark:border-navy-200">
           <div className={cn('flex min-w-0 items-center gap-2', isDesktopCollapsed && 'lg:hidden')}>
-            {/* <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-950 text-primary-100 dark:bg-primary-100 dark:text-primary-950">
+            {/* <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-950 dark:bg-primary-950 dark:text-primary-100">
               <PanelsTopLeft className="h-5 w-5" />
             </div> */}
-            <span className="truncate text-base font-bold tracking-[-0.02em] text-navy-950 dark:text-white">Club Genies</span>
+            <span className="truncate text-base font-bold tracking-[-0.02em] text-white dark:text-navy-950">Club Genies</span>
           </div>
 
           <div className={cn(
-            'hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-950 text-primary-100 dark:bg-primary-100 dark:text-primary-950',
+            'hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-950 dark:bg-primary-950 dark:text-primary-100',
             isDesktopCollapsed && 'lg:flex',
           )}>
             <PanelsTopLeft className="h-5 w-5" />
@@ -332,7 +332,7 @@ export function Sidebar({
               return (
                 <div key="hrm-section" className="contents">
                   {!isDesktopCollapsed && (
-                    <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-700 dark:text-navy-200">
+                    <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-200 dark:text-navy-700">
                       {isRTL ? 'الموارد البشرية' : 'HRM'}
                     </p>
                   )}
@@ -348,7 +348,7 @@ export function Sidebar({
                             title={isDesktopCollapsed ? (isRTL ? 'الإجازات' : 'Leave') : undefined}
                             aria-expanded={leaveOpen}
                           >
-                            <span className={cn('shrink-0', isLeaveActive && 'text-primary-600 dark:text-primary-400')}>
+                            <span className={cn('shrink-0', isLeaveActive && 'text-primary-400 dark:text-primary-600')}>
                               <CalendarDays className="h-5 w-5" />
                             </span>
                             <span className={cn('flex-1 truncate text-start', isDesktopCollapsed && 'lg:hidden')}>
@@ -357,7 +357,7 @@ export function Sidebar({
                             <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform', leaveOpen && 'rotate-180', isDesktopCollapsed && 'lg:hidden')} />
                           </button>
                           {leaveOpen && !isDesktopCollapsed && (
-                            <div className="ms-4 mt-1 space-y-1 border-s border-navy-200 ps-3 dark:border-navy-700">
+                            <div className="ms-4 mt-1 space-y-1 border-s border-navy-700 ps-3 dark:border-navy-200">
                               {visibleLeaveItems.map((sub) => (
                                 <SidebarLink key={sub.href} item={sub} pathname={pathname} isDesktopCollapsed={false} t={t} onClick={onMobileClose} small />
                               ))}
@@ -375,7 +375,7 @@ export function Sidebar({
               return (
                 <div key="inventory-section" className="contents">
                   {!isDesktopCollapsed && (
-                    <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-700 dark:text-navy-200">
+                    <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-200 dark:text-navy-700">
                       {isRTL ? 'المخزون' : 'Inventory'}
                     </p>
                   )}
@@ -391,7 +391,7 @@ export function Sidebar({
                         title={isDesktopCollapsed ? (isRTL ? 'حركة المخزون' : 'Stock') : undefined}
                         aria-expanded={stockOpen}
                       >
-                        <span className={cn('shrink-0', isStockActive && 'text-primary-600 dark:text-primary-400')}>
+                        <span className={cn('shrink-0', isStockActive && 'text-primary-400 dark:text-primary-600')}>
                           <ClipboardList className="h-5 w-5" />
                         </span>
                         <span className={cn('flex-1 truncate text-start', isDesktopCollapsed && 'lg:hidden')}>
@@ -400,7 +400,7 @@ export function Sidebar({
                         <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform', stockOpen && 'rotate-180', isDesktopCollapsed && 'lg:hidden')} />
                       </button>
                       {stockOpen && !isDesktopCollapsed && (
-                        <div className="ms-4 mt-1 space-y-1 border-s border-navy-200 ps-3 dark:border-navy-700">
+                        <div className="ms-4 mt-1 space-y-1 border-s border-navy-700 ps-3 dark:border-navy-200">
                           {visibleStockItems.map((leaf) => (
                             <SidebarLink key={leaf.href} item={leaf} pathname={pathname} isDesktopCollapsed={false} t={t} onClick={onMobileClose} small />
                           ))}
@@ -426,7 +426,7 @@ export function Sidebar({
           })}
         </nav>
 
-        <div className="hidden border-t border-navy-200 p-4 dark:border-navy-700 lg:block">
+        <div className="hidden border-t border-navy-700 p-4 dark:border-navy-200 lg:block">
           <button
             type="button"
             onClick={onDesktopToggle}
@@ -464,7 +464,7 @@ function ExpandableSection({
   return (
     <div className="contents">
       {!isDesktopCollapsed && (
-        <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-700 dark:text-navy-200">
+        <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-200 dark:text-navy-700">
           {title}
         </p>
       )}
@@ -504,7 +504,7 @@ function SidebarLink({
       aria-current={isActive ? 'page' : undefined}
       onClick={onClick}
     >
-      <span className={cn('shrink-0', isActive && 'text-primary-600 dark:text-primary-400')}>
+      <span className={cn('shrink-0', isActive && 'text-primary-400 dark:text-primary-600')}>
         {item.icon}
       </span>
       <span className={cn('flex-1 truncate', isDesktopCollapsed && 'lg:hidden')}>

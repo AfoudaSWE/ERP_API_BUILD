@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import Link from '@/components/router/Link';
 import { useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Store, ShoppingBag, Package,
   Users, Truck, Calculator, Receipt, Wallet, UserCog, Clock, Banknote,
-  BarChart3, Settings, ChevronLeft, ChevronRight, Sparkles, Menu, X,
-  Boxes, Building, UserPlus, ShieldAlert,
+  BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Sparkles, Menu, X,
+  Boxes, Building, UserPlus, ShieldAlert, Tag, Award, Ruler, Warehouse,
+  ClipboardList, ClipboardEdit, ArrowRightLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Locale } from '@/lib/i18n';
@@ -32,10 +34,7 @@ export const navItems: NavItem[] = [
   { href: '/sales', icon: <ShoppingCart className="h-5 w-5" />, labelKey: 'nav.sales', permission: 'sales.read' },
   { href: '/pos', icon: <Store className="h-5 w-5" />, labelKey: 'nav.pos', permission: 'pos.use' },
   { href: '/purchases', icon: <ShoppingBag className="h-5 w-5" />, labelKey: 'nav.purchases', permission: 'purchases.read' },
-  { href: '/inventory', icon: <Package className="h-5 w-5" />, labelKey: 'nav.inventory', permission: 'inventory.read' },
-  { href: '/products', icon: <Boxes className="h-5 w-5" />, labelKey: 'nav.products', permission: 'products.read' },
   { href: '/customers', icon: <Users className="h-5 w-5" />, labelKey: 'nav.customers', permission: 'customers.read' },
-  { href: '/suppliers', icon: <Truck className="h-5 w-5" />, labelKey: 'nav.suppliers', permission: 'suppliers.read' },
   { href: '/crm', icon: <UserPlus className="h-5 w-5" />, labelKey: 'nav.crm', permission: 'crm.read' },
   { href: '/accounting', icon: <Calculator className="h-5 w-5" />, labelKey: 'nav.accounting', permission: 'accounting.read' },
   { href: '/expenses', icon: <Receipt className="h-5 w-5" />, labelKey: 'nav.expenses', permission: 'expenses.read' },
@@ -54,6 +53,22 @@ export function visibleNavItems(can: (permission: string) => boolean, role?: str
   return navItems.filter((item) => can(item.permission));
 }
 
+const inventorySectionItems: NavItem[] = [
+  { href: '/products', icon: <Boxes className="h-4 w-4" />, labelKey: 'nav.products', permission: 'products.read' },
+  { href: '/categories', icon: <Tag className="h-4 w-4" />, labelKey: 'nav.categories', permission: 'products.read' },
+  { href: '/brands', icon: <Award className="h-4 w-4" />, labelKey: 'nav.brands', permission: 'products.read' },
+  { href: '/units', icon: <Ruler className="h-4 w-4" />, labelKey: 'nav.units', permission: 'products.read' },
+  { href: '/inventory', icon: <Package className="h-4 w-4" />, labelKey: 'nav.inventory', permission: 'inventory.read' },
+  { href: '/suppliers', icon: <Truck className="h-4 w-4" />, labelKey: 'nav.suppliers', permission: 'suppliers.read' },
+  { href: '/warehouses', icon: <Warehouse className="h-4 w-4" />, labelKey: 'nav.warehouses', permission: 'inventory.read' },
+];
+
+const stockGroupItems: NavItem[] = [
+  { href: '/inventory', icon: <ClipboardList className="h-4 w-4" />, labelKey: 'nav.manageStock', permission: 'inventory.read' },
+  { href: '/inventory/stock-adjustment', icon: <ClipboardEdit className="h-4 w-4" />, labelKey: 'nav.stockAdjustment', permission: 'inventory.adjust' },
+  { href: '/inventory/stock-transfer', icon: <ArrowRightLeft className="h-4 w-4" />, labelKey: 'nav.stockTransfer', permission: 'inventory.transfer' },
+];
+
 export function Sidebar({
   locale,
   isDesktopCollapsed,
@@ -67,6 +82,13 @@ export function Sidebar({
   const isRTL = locale === 'ar';
   const expandedLabel = isRTL ? 'توسيع القائمة' : 'Expand sidebar';
   const collapsedLabel = isRTL ? 'طي القائمة' : 'Collapse sidebar';
+
+  const visibleInventoryItems = inventorySectionItems.filter((item) => can(item.permission));
+  const visibleStockItems = stockGroupItems.filter((item) => can(item.permission));
+  const isStockActive = pathname.startsWith('/inventory/stock-');
+  const [stockOpen, setStockOpen] = useState(isStockActive);
+  const showInventorySection = user?.role !== 'super_admin' && (visibleInventoryItems.length > 0 || visibleStockItems.length > 0);
+  const customersIndex = navItems.findIndex((item) => item.href === '/customers');
 
   return (
     <>
@@ -119,35 +141,52 @@ export function Sidebar({
         </div>
 
         <nav className="sidebar-nav flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {visibleNavItems(can, user?.role).map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'sidebar-link',
-                  isActive && 'active',
-                  isDesktopCollapsed && 'lg:justify-center lg:px-2',
-                )}
-                title={isDesktopCollapsed ? t(item.labelKey) : undefined}
-                aria-current={isActive ? 'page' : undefined}
-                onClick={onMobileClose}
-              >
-                <span className={cn('shrink-0', isActive && 'text-primary-600 dark:text-primary-400')}>
-                  {item.icon}
-                </span>
-                <span className={cn('flex-1 truncate', isDesktopCollapsed && 'lg:hidden')}>
-                  {t(item.labelKey)}
-                </span>
-                {item.badge && (
-                  <span className={cn('badge badge-primary', isDesktopCollapsed && 'lg:hidden')}>
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
+          {(user?.role === 'super_admin' ? navItems.filter((item) => item.href === '/platform-admin') : navItems).map((item, index) => {
+            if (!can(item.permission) && !(item.href === '/customers' && showInventorySection)) return null;
+            if (index === customersIndex && showInventorySection) {
+              return (
+                <div key="inventory-section" className="contents">
+                  {!isDesktopCollapsed && (
+                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-navy-400 dark:text-navy-500">
+                      {isRTL ? 'المخزون' : 'Inventory'}
+                    </p>
+                  )}
+                  {visibleInventoryItems.map((leaf) => (
+                    <SidebarLink key={leaf.href} item={leaf} pathname={pathname} isDesktopCollapsed={isDesktopCollapsed} t={t} onClick={onMobileClose} />
+                  ))}
+                  {visibleStockItems.length > 0 && (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setStockOpen((open) => !open)}
+                        className={cn('sidebar-link w-full', isStockActive && 'active', isDesktopCollapsed && 'lg:justify-center lg:px-2')}
+                        title={isDesktopCollapsed ? (isRTL ? 'حركة المخزون' : 'Stock') : undefined}
+                        aria-expanded={stockOpen}
+                      >
+                        <span className={cn('shrink-0', isStockActive && 'text-primary-600 dark:text-primary-400')}>
+                          <ClipboardList className="h-5 w-5" />
+                        </span>
+                        <span className={cn('flex-1 truncate text-start', isDesktopCollapsed && 'lg:hidden')}>
+                          {isRTL ? 'حركة المخزون' : 'Stock'}
+                        </span>
+                        <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform', stockOpen && 'rotate-180', isDesktopCollapsed && 'lg:hidden')} />
+                      </button>
+                      {stockOpen && !isDesktopCollapsed && (
+                        <div className="ms-4 mt-1 space-y-1 border-s border-navy-200 ps-3 dark:border-navy-700">
+                          {visibleStockItems.map((leaf) => (
+                            <SidebarLink key={leaf.href} item={leaf} pathname={pathname} isDesktopCollapsed={false} t={t} onClick={onMobileClose} small />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {can(item.permission) && (
+                    <SidebarLink item={item} pathname={pathname} isDesktopCollapsed={isDesktopCollapsed} t={t} onClick={onMobileClose} />
+                  )}
+                </div>
+              );
+            }
+            return <SidebarLink key={item.href} item={item} pathname={pathname} isDesktopCollapsed={isDesktopCollapsed} t={t} onClick={onMobileClose} />;
           })}
         </nav>
 
@@ -168,6 +207,50 @@ export function Sidebar({
         </div>
       </aside>
     </>
+  );
+}
+
+function SidebarLink({
+  item,
+  pathname,
+  isDesktopCollapsed,
+  t,
+  onClick,
+  small,
+}: {
+  item: NavItem;
+  pathname: string;
+  isDesktopCollapsed: boolean;
+  t: (key: string) => string;
+  onClick: () => void;
+  small?: boolean;
+}) {
+  const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        'sidebar-link',
+        small && 'py-1.5 text-sm',
+        isActive && 'active',
+        isDesktopCollapsed && 'lg:justify-center lg:px-2',
+      )}
+      title={isDesktopCollapsed ? t(item.labelKey) : undefined}
+      aria-current={isActive ? 'page' : undefined}
+      onClick={onClick}
+    >
+      <span className={cn('shrink-0', isActive && 'text-primary-600 dark:text-primary-400')}>
+        {item.icon}
+      </span>
+      <span className={cn('flex-1 truncate', isDesktopCollapsed && 'lg:hidden')}>
+        {t(item.labelKey)}
+      </span>
+      {item.badge && (
+        <span className={cn('badge badge-primary', isDesktopCollapsed && 'lg:hidden')}>
+          {item.badge}
+        </span>
+      )}
+    </Link>
   );
 }
 

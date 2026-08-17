@@ -24,6 +24,12 @@ export const categoryInputSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+export const brandInputSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  nameAr: z.string().trim().max(120).default(''),
+  isActive: z.boolean().default(true),
+});
+
 export const commerceProductStatusSchema = z.enum(['draft', 'active', 'archived']);
 export const commerceProductFieldsSchema = productInputSchema.extend({
   status: commerceProductStatusSchema.default('active'),
@@ -87,5 +93,6 @@ export interface CommerceProduct {
 
 export type ProductInput = z.infer<typeof productInputSchema>;
 export type CategoryInput = z.infer<typeof categoryInputSchema>;
+export type BrandInput = z.infer<typeof brandInputSchema>;
 export type CommerceProductInput = z.infer<typeof commerceProductInputSchema>;
 export type CommerceProductQuery = z.infer<typeof commerceProductQuerySchema>;

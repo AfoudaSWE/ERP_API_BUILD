@@ -1,0 +1,19 @@
+import { AppLayout } from "@/components/layout/AppLayout";
+import { CatalogCrud } from "@/components/shared/CatalogCrud";
+import { useTranslation } from "react-i18next";
+
+export default function BrandsPage() {
+  const { i18n } = useTranslation();
+  const ar = i18n.language.startsWith("ar");
+  return (
+    <AppLayout>
+      <main className="space-y-6 p-4 sm:p-6">
+        <header>
+          <h1 className="text-2xl font-bold">{ar ? "الماركات" : "Brands"}</h1>
+          <p className="text-sm text-navy-500">{ar ? "إدارة ماركات المنتجات" : "Manage product brands"}</p>
+        </header>
+        <CatalogCrud ar={ar} title={ar ? "ماركة" : "brand"} endpoint="/brands" />
+      </main>
+    </AppLayout>
+  );
+}

@@ -7,13 +7,17 @@ import AttendancePortal, {
   AttendancePortalLogin,
 } from "@/app/attendance-portal/page";
 import BranchesPage from "@/app/branches/page";
+import BrandsPage from "@/app/brands/page";
 import CashBanksPage from "@/app/cash-banks/page";
+import CategoriesPage from "@/app/categories/page";
 import CRMPage from "@/app/crm/page";
 import CustomersPage from "@/app/customers/page";
 import ExpensesPage from "@/app/expenses/page";
 import HelpPage from "@/app/help/page";
 import HRPage from "@/app/hr/page";
 import InventoryPage from "@/app/inventory/page";
+import StockAdjustmentPage from "@/app/inventory/stock-adjustment/page";
+import StockTransferPage from "@/app/inventory/stock-transfer/page";
 import NotificationsPage from "@/app/notifications/page";
 import PayrollPage from "@/app/payroll/page";
 import POSPage from "@/app/pos/page";
@@ -24,6 +28,8 @@ import SalesPage from "@/app/sales/page";
 import NewSalesInvoicePage from "@/app/sales/new-page";
 import SettingsPage from "@/app/settings/page";
 import SuppliersPage from "@/app/suppliers/page";
+import UnitsPage from "@/app/units/page";
+import WarehousesPage from "@/app/warehouses/page";
 import NotFound from "@/app/not-found";
 import ErrorPage from "@/app/error";
 import { AccountingRoutePage } from "@/components/shared/AccountingRoutePage";
@@ -199,6 +205,8 @@ export default function App() {
       <ApiDataProvider>
         <Routes>
           <Route path="/" element={<HomeRoute />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/signup" element={<Navigate to="/" replace />} />
           <Route
             path="/accounting"
             element={
@@ -331,10 +339,58 @@ export default function App() {
             }
           />
           <Route
+            path="/inventory/stock-adjustment"
+            element={
+              <PermissionRoute permission="inventory.adjust">
+                <StockAdjustmentPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/inventory/stock-transfer"
+            element={
+              <PermissionRoute permission="inventory.transfer">
+                <StockTransferPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
             path="/inventory/*"
             element={
               <PermissionRoute permission="inventory.read">
                 <InventoryRoute />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              <PermissionRoute permission="products.read">
+                <CategoriesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/brands"
+            element={
+              <PermissionRoute permission="products.read">
+                <BrandsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/units"
+            element={
+              <PermissionRoute permission="products.read">
+                <UnitsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/warehouses"
+            element={
+              <PermissionRoute permission="inventory.read">
+                <WarehousesPage />
               </PermissionRoute>
             }
           />

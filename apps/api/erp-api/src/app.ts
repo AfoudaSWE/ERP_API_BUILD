@@ -6,7 +6,7 @@ import { env } from "./config/env.js";
 import { errorHandler, notFound } from "./lib/http.js";
 import { authRouter } from "./features/auth/routes.js";
 import { authenticate } from "./features/auth/middleware.js";
-import { categoriesRouter, productsRouter } from "./features/catalog/routes.js";
+import { brandsRouter, categoriesRouter, productsRouter } from "./features/catalog/routes.js";
 import { partiesRouter } from "./features/parties/routes.js";
 import { salesRouter } from "./features/sales/routes.js";
 import { dashboardRouter } from "./features/dashboard/routes.js";
@@ -93,6 +93,7 @@ export function createApp() {
   app.use("/api/payroll", payrollRouter);
   app.use("/api/platform", platformRouter);
   app.use("/api/categories", categoriesRouter);
+  app.use("/api/brands", brandsRouter);
   app.use("/api", partiesRouter);
   app.use("/api/sales", salesRouter);
   app.use("/api/dashboard", dashboardRouter);

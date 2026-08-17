@@ -6,7 +6,7 @@ import { serializeRow, serializeRows } from '../../lib/rows.js';
 import { authorizeAny } from '../auth/middleware.js';
 
 interface CrudConfig<T extends ZodRawShape> {
-  table: 'customers' | 'suppliers' | 'products' | 'categories';
+  table: 'customers' | 'suppliers' | 'products' | 'categories' | 'brands';
   schema: ZodObject<T>;
   columns: Record<string, string>;
   searchColumns: string[];

@@ -12,11 +12,13 @@ export {
   commerceProductQuerySchema,
   productInputSchema,
   categoryInputSchema,
+  brandInputSchema,
   type CommerceProduct,
   type CommerceProductInput,
   type CommerceProductQuery,
   type ProductInput,
   type CategoryInput,
+  type BrandInput,
 } from '@erp/commerce-catalog-contracts';
 
 export interface ApiResponse<T> {

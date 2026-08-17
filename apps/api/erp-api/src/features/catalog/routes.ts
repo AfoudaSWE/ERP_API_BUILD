@@ -1,4 +1,4 @@
-import { categoryInputSchema, productInputSchema } from '@erp/contracts';
+import { brandInputSchema, categoryInputSchema, productInputSchema } from '@erp/contracts';
 import { createCrudRouter } from '../shared/crud-router.js';
 
 export const productsRouter = createCrudRouter({
@@ -19,4 +19,12 @@ export const categoriesRouter = createCrudRouter({
   schema: categoryInputSchema,
   searchColumns: ['name', 'name_ar'],
   columns: { name: 'name', nameAr: 'name_ar', type: 'type', isActive: 'is_active' },
+});
+
+export const brandsRouter = createCrudRouter({
+  table: 'brands',
+  permissionBase: 'products',
+  schema: brandInputSchema,
+  searchColumns: ['name', 'name_ar'],
+  columns: { name: 'name', nameAr: 'name_ar', isActive: 'is_active' },
 });

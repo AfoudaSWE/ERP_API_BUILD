@@ -63,7 +63,7 @@ export function StatCard({
           )}
         </div>
         {icon && (
-          <div className={cn('p-3 rounded-xl', iconBg, 'group-hover:scale-105 transition-transform')}>
+          <div className={cn('rounded-lg p-2.5', iconBg)}>
             {icon}
           </div>
         )}

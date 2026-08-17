@@ -1,10 +1,10 @@
 import { test, expect } from './fixtures/auth';
 
-test('sidebar section titles are bold and black', async ({ page, loginAs }) => {
+test('sidebar section titles use the prominent navigation label style', async ({ page, loginAs }) => {
   await loginAs('owner');
   const title = page.locator('nav p.font-bold').first();
   await expect(title).toBeVisible();
-  await expect(title).toHaveClass(/text-black/);
+  await expect(title).toHaveClass(/text-navy-700/);
 });
 
 test('sidebar keeps its scroll position after clicking a link far down the list', async ({ page, loginAs }) => {

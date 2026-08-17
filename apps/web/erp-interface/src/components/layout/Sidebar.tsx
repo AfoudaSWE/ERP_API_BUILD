@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Store, ShoppingBag, Package,
   Users, Truck, Calculator, Receipt, Wallet, UserCog, Clock, Banknote,
-  BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Sparkles, Menu, X,
+  BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, PanelsTopLeft, Menu, X,
   Boxes, Building, UserPlus, ShieldAlert, Tag, Award, Ruler, Warehouse,
   ClipboardList, ClipboardEdit, ArrowRightLeft, FileText, Repeat, FileStack,
   Undo2, FileSpreadsheet, CircleDollarSign, Truck as TruckIcon, PackageMinus, LineChart,
@@ -187,7 +187,7 @@ export function Sidebar({
     <>
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-black/50 backdrop-blur-[1px] transition-opacity duration-300 lg:hidden',
+          'fixed inset-0 z-40 bg-navy-950/55 transition-opacity duration-200 lg:hidden',
           isMobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
         onClick={onMobileClose}
@@ -206,21 +206,19 @@ export function Sidebar({
         )}
         aria-label={isRTL ? 'التنقل الرئيسي' : 'Main navigation'}
       >
-        <div className="flex h-16 items-center justify-between gap-2 border-b border-navy-200 px-4 dark:border-navy-700">
+        <div className="flex h-16 items-center justify-between gap-2 border-b border-navy-200 px-3 dark:border-navy-700">
           <div className={cn('flex min-w-0 items-center gap-2', isDesktopCollapsed && 'lg:hidden')}>
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-sm shadow-primary-500/30">
-              <Sparkles className="h-5 w-5 text-white" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-950 text-primary-100 dark:bg-primary-100 dark:text-primary-950">
+              <PanelsTopLeft className="h-5 w-5" />
             </div>
-            <span className="truncate text-lg font-bold text-navy-900 dark:text-white">
-              {isRTL ? 'ERP' : 'ERP'}
-            </span>
+            <span className="truncate text-base font-bold tracking-[-0.02em] text-navy-950 dark:text-white">ClubGenies</span>
           </div>
 
           <div className={cn(
-            'hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700',
+            'hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-950 text-primary-100 dark:bg-primary-100 dark:text-primary-950',
             isDesktopCollapsed && 'lg:flex',
           )}>
-            <Sparkles className="h-5 w-5 text-white" />
+            <PanelsTopLeft className="h-5 w-5" />
           </div>
 
           <button
@@ -307,7 +305,7 @@ export function Sidebar({
               return (
                 <div key="hrm-section" className="contents">
                   {!isDesktopCollapsed && (
-                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-black dark:text-white">
+                    <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-700 dark:text-navy-200">
                       {isRTL ? 'الموارد البشرية' : 'HRM'}
                     </p>
                   )}
@@ -350,7 +348,7 @@ export function Sidebar({
               return (
                 <div key="inventory-section" className="contents">
                   {!isDesktopCollapsed && (
-                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-black dark:text-white">
+                    <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-700 dark:text-navy-200">
                       {isRTL ? 'المخزون' : 'Inventory'}
                     </p>
                   )}
@@ -438,7 +436,7 @@ function ExpandableSection({
   return (
     <div className="contents">
       {!isDesktopCollapsed && (
-        <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-black dark:text-white">
+        <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-[0.04em] text-navy-700 dark:text-navy-200">
           {title}
         </p>
       )}

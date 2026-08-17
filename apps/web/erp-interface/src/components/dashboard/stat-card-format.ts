@@ -1,7 +1,7 @@
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
 export type StatCardFormat = 'auto' | 'currency' | 'decimal' | 'integer' | 'raw';
-export const STAT_CARD_LAYOUT_CLASS = 'stat-card group flex h-full min-h-44 flex-col justify-between overflow-hidden';
+export const STAT_CARD_LAYOUT_CLASS = 'stat-card group flex h-full min-h-32 flex-col justify-between overflow-hidden';
 
 export function formatStatCardValue(input: { value: unknown; format?: StatCardFormat; locale?: string; currency?: string; fallback?: string }) {
   const { value, format = 'auto', locale = 'en-EG', currency = 'EGP', fallback = '—' } = input;

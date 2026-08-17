@@ -13,6 +13,10 @@ function slugForEmail(value: string) {
     .replace(/[^a-z0-9]/g, '');
 }
 
+function looksLikeEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export default function SignupPage() {
   const { signup } = useAuth();
   const { i18n } = useTranslation();
@@ -29,11 +33,19 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
     const values = Object.fromEntries(new FormData(event.currentTarget).entries());
+    const submittedCompanyName = String(values.companyName);
+    const submittedCompanyNameAr = String(values.companyNameAr ?? '');
+    const submittedName = String(values.name);
+    if ([submittedCompanyName, submittedCompanyNameAr, submittedName].some(looksLikeEmail)) {
+      setError(ar ? 'الاسم واسم الشركة لا يمكن أن يكونا بريدًا إلكترونيًا.' : 'Your name and company name cannot be email addresses.');
+      setLoading(false);
+      return;
+    }
     try {
       await signup({
-        companyName: String(values.companyName),
-        companyNameAr: String(values.companyNameAr ?? ''),
-        name: String(values.name),
+        companyName: submittedCompanyName,
+        companyNameAr: submittedCompanyNameAr,
+        name: submittedName,
         email: String(values.email),
         password: String(values.password),
       });
@@ -46,7 +58,6 @@ export default function SignupPage() {
 
   return (
     <AuthLayout
-      meta={ar ? 'تجربة مجانية ١٤ يوم' : '14-DAY FREE TRIAL'}
       headline={ar ? <>شركتك.<br />جاهزة تشتغل.</> : <>Your company.<br />Ready to ship.</>}
     >
       {error && (
@@ -57,7 +68,7 @@ export default function SignupPage() {
       <form onSubmit={submit} className="space-y-5">
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label htmlFor="companyName" className="mb-2 block font-mono text-xs uppercase tracking-wider text-navy-400">
+            <label htmlFor="companyName" className="label text-navy-700">
               {ar ? 'اسم الشركة' : 'Company name'}
             </label>
             <input
@@ -68,19 +79,21 @@ export default function SignupPage() {
               required
               minLength={2}
               maxLength={120}
+              pattern="[^@]+"
+              title={ar ? 'أدخل اسم شركة، وليس بريدًا إلكترونيًا' : 'Enter a company name, not an email address'}
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
             />
           </div>
           <div>
-            <label htmlFor="companyNameAr" className="mb-2 block font-mono text-xs uppercase tracking-wider text-navy-400">
+            <label htmlFor="companyNameAr" className="label text-navy-700">
               {ar ? 'بالعربية' : 'Arabic name'}
             </label>
-            <input id="companyNameAr" name="companyNameAr" type="text" className="input" maxLength={120} placeholder={ar ? 'اختياري' : 'Optional'} />
+            <input id="companyNameAr" name="companyNameAr" type="text" className="input" maxLength={120} pattern="[^@]*" title={ar ? 'أدخل اسم شركة، وليس بريدًا إلكترونيًا' : 'Enter a company name, not an email address'} placeholder={ar ? 'اختياري' : 'Optional'} />
           </div>
         </div>
         <div>
-          <label htmlFor="name" className="mb-2 block font-mono text-xs uppercase tracking-wider text-navy-400">
+          <label htmlFor="name" className="label text-navy-700">
             {ar ? 'اسمك' : 'Your name'}
           </label>
           <input
@@ -91,12 +104,14 @@ export default function SignupPage() {
             required
             minLength={2}
             maxLength={120}
+            pattern="[^@]+"
+            title={ar ? 'أدخل اسمك، وليس بريدًا إلكترونيًا' : 'Enter your name, not an email address'}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div>
-          <label htmlFor="email" className="mb-2 block font-mono text-xs uppercase tracking-wider text-navy-400">
+          <label htmlFor="email" className="label text-navy-700">
             {ar ? 'البريد الإلكتروني' : 'Email'}
           </label>
           <input
@@ -109,12 +124,12 @@ export default function SignupPage() {
             value={email}
             placeholder={ar ? 'اكتب اسم الشركة أولاً' : 'Type the company name first'}
           />
-          <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-wider text-navy-600">
+          <p className="mt-2 text-xs text-navy-500">
             {ar ? 'ثابت حسب اسم الشركة' : 'Fixed to the company name'}
           </p>
         </div>
         <div>
-          <label htmlFor="password" className="mb-2 block font-mono text-xs uppercase tracking-wider text-navy-400">
+          <label htmlFor="password" className="label text-navy-700">
             {ar ? 'كلمة المرور' : 'Password'}
           </label>
           <input id="password" name="password" type="password" className="input" required minLength={8} autoComplete="new-password" />
@@ -124,10 +139,10 @@ export default function SignupPage() {
           {loading ? (ar ? 'جارٍ الإنشاء…' : 'Creating…') : (ar ? 'ابدأ التجربة المجانية' : 'Start free trial')}
         </button>
       </form>
-      <div className="my-6 border-t border-dashed border-navy-800" />
-      <p className="font-mono text-xs uppercase tracking-wider text-navy-500">
+      <div className="my-6 border-t border-dashed border-navy-200" />
+      <p className="text-sm text-navy-500">
         {ar ? 'عندك حساب بالفعل؟' : 'Already have an account?'}{' '}
-        <Link href="/login" className="text-white underline decoration-navy-600 underline-offset-4 hover:decoration-white">
+        <Link href="/login" className="font-medium text-primary-700 underline decoration-primary-300 underline-offset-4 hover:decoration-primary-700">
           {ar ? 'تسجيل الدخول' : 'Sign in'}
         </Link>
       </p>

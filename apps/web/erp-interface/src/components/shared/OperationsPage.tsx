@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Bell, Building2, Clock3, Landmark, Search, WalletCards } from 'lucide-react';
+import { useMemo } from 'react';
+import { Bell, Building2, Clock3, Landmark, WalletCards } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useTranslation } from 'react-i18next';
 
@@ -16,40 +16,23 @@ const contentByKind = {
 export function OperationsPage({ kind }: { kind: Kind }) {
   const { i18n } = useTranslation();
   const isArabic = i18n.language.startsWith('ar');
-  const [query, setQuery] = useState('');
   const content = useMemo(() => contentByKind[kind], [kind]);
   const Icon = content.icon;
 
   return (
     <AppLayout>
-      <section className="mb-6">
-        <div className="mb-2 flex items-center gap-2 text-sm font-medium text-primary-600">
-          <Icon className="h-4 w-4" />
-          {isArabic ? 'العمليات' : 'Operations'}
+      <section className="mb-6 flex items-start gap-3 border-b border-navy-200 pb-5 dark:border-navy-700">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-200"><Icon className="h-5 w-5" /></span>
+        <div>
+          <h1 className="text-2xl font-bold tracking-[-0.02em] text-navy-950 dark:text-white">{isArabic ? content.ar : content.en}</h1>
+          <p className="mt-1 max-w-2xl text-sm text-navy-500">{isArabic ? 'ستظهر السجلات هنا عند توفرها.' : 'Records will appear here when they are available.'}</p>
         </div>
-        <h1 className="text-2xl font-bold text-navy-900 dark:text-white">{isArabic ? content.ar : content.en}</h1>
-        <p className="mt-1 text-navy-500">{isArabic ? 'ابدأ بإضافة أول سجل.' : 'Start by adding your first record.'}</p>
       </section>
-
-      <section className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {[0, 1, 2, 3].map((index) => (
-          <div key={index} className="stat-card">
-            <p className="stat-label">{isArabic ? 'الإجمالي' : 'Total'}</p>
-            <p className="mt-2 text-xl font-bold text-navy-900 dark:text-white">0</p>
-          </div>
-        ))}
-      </section>
-
       <section className="card overflow-hidden">
-        <div className="border-b border-navy-200 p-4 dark:border-navy-700">
-          <div className="relative max-w-sm">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-400" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} className="input ps-10" placeholder={isArabic ? 'بحث...' : 'Search...'} />
-          </div>
-        </div>
         <div className="empty-state">
           <Icon className="empty-state-icon" />
-          <h3 className="empty-state-title">{isArabic ? 'لا توجد بيانات بعد' : 'No data yet'}</h3>
+          <h2 className="empty-state-title">{isArabic ? 'لا توجد سجلات بعد' : 'No records yet'}</h2>
+          <p className="empty-state-description">{isArabic ? 'لا توجد بيانات متاحة لهذا القسم حالياً.' : 'There is no data available for this area yet.'}</p>
         </div>
       </section>
     </AppLayout>

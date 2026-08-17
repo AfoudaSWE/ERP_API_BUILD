@@ -89,9 +89,8 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="stat-card">
+      <div className="card mb-6 grid grid-cols-2 divide-x divide-y overflow-hidden md:grid-cols-4 md:divide-y-0">
+        <div className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
               <Package className="w-5 h-5 text-primary-600" />
@@ -102,7 +101,7 @@ export default function ProductsPage() {
             </div>
           </div>
         </div>
-        <div className="stat-card">
+        <div className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-success-50 dark:bg-success-900/30 rounded-lg">
               <Package className="w-5 h-5 text-success-600" />
@@ -113,7 +112,7 @@ export default function ProductsPage() {
             </div>
           </div>
         </div>
-        <div className="stat-card border-s-4 border-s-warning-500">
+        <div className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-warning-50 dark:bg-warning-900/30 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-warning-600" />
@@ -124,7 +123,7 @@ export default function ProductsPage() {
             </div>
           </div>
         </div>
-        <div className="stat-card border-s-4 border-s-danger-500">
+        <div className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-danger-50 dark:bg-danger-900/30 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-danger-600" />

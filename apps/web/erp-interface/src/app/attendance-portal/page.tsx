@@ -124,9 +124,9 @@ export function AttendancePortalLogin() {
   return (
     <main
       dir={ar ? "rtl" : "ltr"}
-      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-4"
+      className="flex min-h-screen items-center justify-center bg-navy-950 p-4"
     >
-      <section className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl sm:p-9">
+      <section className="w-full max-w-md rounded-xl border border-navy-200 bg-white p-7 shadow-xl sm:p-9">
         <button
           className="mb-6 text-sm text-blue-700"
           onClick={() => void i18n.changeLanguage(ar ? "en" : "ar")}
@@ -134,7 +134,7 @@ export function AttendancePortalLogin() {
           {ar ? "English" : "العربية"}
         </button>
         <div className="mb-8 flex items-center gap-3">
-          <span className="rounded-2xl bg-blue-600 p-3 text-white">
+          <span className="rounded-lg bg-primary-900 p-3 text-white">
             <Clock3 />
           </span>
           <div>
@@ -376,7 +376,7 @@ export default function AttendancePortal() {
           <button
             disabled={busy || today.state === "checked_out"}
             onClick={() => void punch()}
-            className="mx-auto mt-7 flex h-44 w-44 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-800 text-white shadow-xl disabled:opacity-50"
+            className="mx-auto mt-7 flex h-44 w-44 flex-col items-center justify-center rounded-full bg-primary-700 text-white shadow-xl disabled:opacity-50"
           >
             {busy ? (
               <Loader2 className="h-16 w-16 animate-spin" />

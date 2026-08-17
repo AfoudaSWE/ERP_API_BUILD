@@ -12,9 +12,9 @@ describe('StatCard presentation formatting', () => {
     expect(formatStatCardValue({ value: 12, format: 'integer', locale: 'en-US' })).toBe('12');
     expect(formatStatCardValue({ value: '12 items', format: 'raw' })).toBe('12 items');
   });
-  it('uses a shared equal-height responsive card contract', () => {
+  it('uses a shared compact equal-height card contract', () => {
     expect(STAT_CARD_LAYOUT_CLASS).toContain('h-full');
-    expect(STAT_CARD_LAYOUT_CLASS).toContain('min-h-44');
+    expect(STAT_CARD_LAYOUT_CLASS).toContain('min-h-32');
     expect(STAT_CARD_LAYOUT_CLASS).toContain('overflow-hidden');
   });
 });

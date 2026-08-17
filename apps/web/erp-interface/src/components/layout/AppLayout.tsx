@@ -25,7 +25,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         onDesktopToggle={() => setIsDesktopSidebarCollapsed((collapsed) => !collapsed)}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
       />
-      <div className={cn('min-w-0 transition-[padding] duration-300', isDesktopSidebarCollapsed ? 'lg:ps-20' : 'lg:ps-64')}>
+      <div className={cn('min-w-0 transition-[padding] duration-200', isDesktopSidebarCollapsed ? 'lg:ps-20' : 'lg:ps-64')}>
         <Header
           locale={locale}
           onLocaleChange={(nextLocale) => void i18n.changeLanguage(nextLocale)}
@@ -33,7 +33,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           onSidebarToggle={() => setIsMobileSidebarOpen((open) => !open)}
           user={currentUser}
         />
-        <main className="p-4 md:p-6 lg:p-8">
+        <main className="page-frame p-4 sm:p-5 lg:p-6 xl:p-8">
           {error && (
             <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-danger-500/30 bg-danger-50 p-4 text-sm text-danger-700 dark:bg-danger-900/20 dark:text-red-300">
               <span>{t('shell.apiError', { message: error })}</span>

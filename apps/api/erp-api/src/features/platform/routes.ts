@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
+import { env } from "../../config/env.js";
 import { query, transaction } from "../../db/client.js";
 import { HttpError, validate } from "../../lib/http.js";
 import { serializeRows } from "../../lib/rows.js";
+import { sendMail } from "../../lib/mailer.js";
 import { appendAuditEvent } from "../audit/routes.js";
 
 export const platformRouter = Router();
@@ -23,7 +25,7 @@ platformRouter.get("/companies", async (req, res) => {
           ORDER BY u.created_at ASC LIMIT 1) owner
      FROM companies c JOIN tenants t ON t.id = c.tenant_id
      WHERE c.id <> $1
-     ORDER BY c.created_at DESC`,
+     ORDER BY (c.subscription_status = 'pending_approval') DESC, c.created_at DESC`,
     [req.auth!.companyId],
   );
   res.json({ data: serializeRows(rows.rows) });
@@ -69,6 +71,56 @@ platformRouter.patch("/companies/:id", async (req, res) => {
     });
     return updated;
   });
+  res.json({ data: row });
+});
+
+platformRouter.post("/companies/:id/approve", async (req, res) => {
+  requirePlatformAdmin(req);
+  if (req.params.id === req.auth!.companyId)
+    throw new HttpError(400, "CANNOT_MODIFY_PLATFORM_COMPANY", "Cannot modify the platform's own company");
+  const row = await transaction(async (client) => {
+    const before = (
+      await client.query<{ id: string; name: string; subscription_status: string }>(
+        "SELECT * FROM companies WHERE id=$1 FOR UPDATE",
+        [req.params.id],
+      )
+    ).rows[0];
+    if (!before) throw new HttpError(404, "COMPANY_NOT_FOUND", "Company not found");
+    if (before.subscription_status !== "pending_approval")
+      throw new HttpError(409, "NOT_PENDING_APPROVAL", "This company is not awaiting approval");
+    const updated = (
+      await client.query(
+        `UPDATE companies SET subscription_status='trial', trial_ends_at=now()+($2 || ' days')::interval,
+           approved_at=now(), approved_by=$3, updated_at=now()
+         WHERE id=$1 RETURNING *`,
+        [req.params.id, env.SIGNUP_TRIAL_DAYS, req.auth!.userId],
+      )
+    ).rows[0];
+    await appendAuditEvent(client, {
+      tenantId: req.auth!.tenantId,
+      companyId: req.auth!.companyId,
+      actorUserId: req.auth!.userId,
+      action: "platform.company_approved",
+      entityType: "company",
+      entityId: String(req.params.id),
+      before,
+      after: updated,
+    });
+    return updated;
+  });
+  const owner = (
+    await query<{ email: string; name: string }>(
+      "SELECT email, name FROM users WHERE company_id=$1 AND role='company_owner' ORDER BY created_at ASC LIMIT 1",
+      [req.params.id],
+    )
+  ).rows[0];
+  if (owner) {
+    void sendMail({
+      to: owner.email,
+      subject: `Your company "${row.name}" has been approved`,
+      html: `<p>Hi ${owner.name},</p><p>Your company <strong>${row.name}</strong> has been approved. You can now sign in and start your free trial.</p>`,
+    });
+  }
   res.json({ data: row });
 });
 

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { apiPublicRequest, apiRequest, hasStoredToken, setAccessToken } from '@erp/shared-frontend-data-access';
 
 export interface AuthUser { id: string; tenantId: string; companyId: string; email: string; name: string; role: string; permissions: string[] }
-interface AuthContextValue { user: AuthUser | null; isLoading: boolean; login(email: string, password: string): Promise<void>; signup(input: { companyName: string; companyNameAr?: string; name: string; email: string; password: string }): Promise<void>; logout(): void; can(permission: string): boolean }
+interface AuthContextValue { user: AuthUser | null; isLoading: boolean; login(email: string, password: string): Promise<void>; signup(input: { companyName: string; companyNameAr?: string; name: string; email: string; password: string }): Promise<{ pendingApproval: boolean }>; logout(): void; can(permission: string): boolean }
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -20,8 +20,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(result.accessToken); setUser(result.user);
   }, []);
   const signup = useCallback(async (input: { companyName: string; companyNameAr?: string; name: string; email: string; password: string }) => {
-    const result = await apiPublicRequest<{ accessToken: string; user: AuthUser }>('/auth/signup', { method: 'POST', body: JSON.stringify(input) });
+    const result = await apiPublicRequest<{ accessToken: string; user: AuthUser; pendingApproval?: boolean }>('/auth/signup', { method: 'POST', body: JSON.stringify(input) });
+    if (result.pendingApproval) return { pendingApproval: true };
     setAccessToken(result.accessToken); setUser(result.user);
+    return { pendingApproval: false };
   }, []);
   const value = useMemo<AuthContextValue>(() => ({ user, isLoading, login, signup, logout, can: (permission) => Boolean(user?.permissions.includes(permission)) }), [user, isLoading, login, signup, logout]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

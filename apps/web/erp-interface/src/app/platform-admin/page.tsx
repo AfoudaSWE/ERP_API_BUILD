@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Ban, CalendarPlus, CheckCircle2, ShieldAlert, Trash2 } from "lucide-react";
+import { Ban, CalendarPlus, CheckCircle2, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { apiRequest } from "@erp/shared-frontend-data-access";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ type Company = {
   id: string;
   name: string;
   nameAr: string;
-  subscriptionStatus: "trial" | "active" | "suspended" | "canceled";
+  subscriptionStatus: "pending_approval" | "trial" | "active" | "suspended" | "canceled";
   trialEndsAt: string | null;
   createdAt: string;
   tenantSlug: string;
@@ -17,6 +17,7 @@ type Company = {
 };
 
 const STATUS_BADGE: Record<Company["subscriptionStatus"], string> = {
+  pending_approval: "badge badge-warning",
   trial: "badge badge-warning",
   active: "badge badge-success",
   suspended: "badge badge-danger",
@@ -53,6 +54,20 @@ export default function PlatformAdminPage() {
       });
       await load();
       setMessage(ar ? "تم تحديث حالة الاشتراك." : "Subscription status updated.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function approveCompany(id: string) {
+    setBusyId(id);
+    setError("");
+    try {
+      await apiRequest(`/platform/companies/${id}/approve`, { method: "POST" });
+      await load();
+      setMessage(ar ? "تم اعتماد الشركة وبدء فترة التجربة." : "Company approved and trial started.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
     } finally {
@@ -152,7 +167,19 @@ export default function PlatformAdminPage() {
                     <td>{new Date(c.createdAt).toLocaleDateString(ar ? "ar-EG" : "en-EG")}</td>
                     <td>
                       <div className="flex flex-wrap gap-1">
-                        {c.subscriptionStatus !== "active" && (
+                        {c.subscriptionStatus === "pending_approval" && (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            disabled={busyId === c.id}
+                            onClick={() => void approveCompany(c.id)}
+                            aria-label={ar ? "اعتماد" : "Approve"}
+                            title={ar ? "اعتماد الشركة وبدء التجربة" : "Approve company and start trial"}
+                          >
+                            <ShieldCheck className="h-4 w-4" />
+                            {ar ? "اعتماد" : "Approve"}
+                          </button>
+                        )}
+                        {c.subscriptionStatus !== "pending_approval" && c.subscriptionStatus !== "active" && (
                           <button
                             className="btn btn-ghost btn-sm text-success-600"
                             disabled={busyId === c.id}
@@ -163,7 +190,7 @@ export default function PlatformAdminPage() {
                             <CheckCircle2 className="h-4 w-4" />
                           </button>
                         )}
-                        {c.subscriptionStatus !== "suspended" && (
+                        {c.subscriptionStatus !== "pending_approval" && c.subscriptionStatus !== "suspended" && (
                           <button
                             className="btn btn-ghost btn-sm text-warning-600"
                             disabled={busyId === c.id}

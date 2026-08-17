@@ -20,7 +20,12 @@ export default function LoginPage() {
     try {
       await login(String(values.email), String(values.password));
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : (ar ? 'تعذّر تسجيل الدخول' : 'Unable to sign in'));
+      const code = requestError && typeof requestError === 'object' && 'code' in requestError ? String((requestError as { code: unknown }).code) : undefined;
+      if (code === 'PENDING_APPROVAL') {
+        setError(ar ? 'حساب شركتك لسه قيد المراجعة والاعتماد. هنبعتلك إشعار بمجرد الاعتماد.' : 'Your company account is still awaiting approval. You will be notified once it is approved.');
+      } else {
+        setError(requestError instanceof Error ? requestError.message : (ar ? 'تعذّر تسجيل الدخول' : 'Unable to sign in'));
+      }
     } finally {
       setLoading(false);
     }

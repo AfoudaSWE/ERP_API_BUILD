@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { UserPlus } from 'lucide-react';
+import { MailCheck, UserPlus } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
 import Link from '@/components/router/Link';
@@ -23,6 +23,7 @@ export default function SignupPage() {
   const ar = i18n.language.startsWith('ar');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [name, setName] = useState('');
   const domain = slugForEmail(companyName);
@@ -42,18 +43,39 @@ export default function SignupPage() {
       return;
     }
     try {
-      await signup({
+      const result = await signup({
         companyName: submittedCompanyName,
         companyNameAr: submittedCompanyNameAr,
         name: submittedName,
         email: String(values.email),
         password: String(values.password),
       });
+      if (result.pendingApproval) setPendingApproval(true);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : (ar ? 'تعذّر إنشاء الحساب' : 'Unable to create account'));
     } finally {
       setLoading(false);
     }
+  }
+
+  if (pendingApproval) {
+    return (
+      <AuthLayout
+        headline={ar ? <>شبه خلصنا.<br />في انتظار الاعتماد.</> : <>Almost there.<br />Awaiting approval.</>}
+      >
+        <div className="flex flex-col items-center gap-4 py-6 text-center">
+          <MailCheck className="h-12 w-12 text-primary-600" />
+          <p className="text-navy-700">
+            {ar
+              ? 'تم إنشاء حسابك بنجاح. طلبك الآن قيد المراجعة من فريقنا، وهنبعتلك إشعار بمجرد الاعتماد عشان تقدر تسجل الدخول.'
+              : "Your account was created successfully. Your request is now under review by our team, and you'll be notified as soon as it's approved so you can sign in."}
+          </p>
+          <Link href="/login" className="btn btn-primary btn-md">
+            {ar ? 'العودة لتسجيل الدخول' : 'Back to sign in'}
+          </Link>
+        </div>
+      </AuthLayout>
+    );
   }
 
   return (

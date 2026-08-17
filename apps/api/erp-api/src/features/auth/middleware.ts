@@ -28,6 +28,9 @@ export async function authenticate(request: Request, _response: Response, next: 
       )
     ).rows[0];
     if (subscription && current[0].role !== 'super_admin') {
+      if (subscription.subscription_status === 'pending_approval') {
+        return next(new HttpError(402, 'PENDING_APPROVAL', 'This company is awaiting approval before it can be used'));
+      }
       if (subscription.subscription_status === 'suspended' || subscription.subscription_status === 'canceled') {
         return next(new HttpError(402, 'SUBSCRIPTION_INACTIVE', 'This company subscription is not active'));
       }

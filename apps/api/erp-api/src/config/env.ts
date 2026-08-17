@@ -21,6 +21,12 @@ const envSchema = z.object({
   OLLAMA_URL: z.url().optional(),
   OLLAMA_MODEL: z.string().min(1).default('qwen2.5-coder:7b'),
   OLLAMA_TIMEOUT_MS: z.coerce.number().int().positive().default(120000),
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
+  PLATFORM_APPROVAL_EMAIL: z.string().optional(),
 }).superRefine((value, context) => {
   if (value.NODE_ENV !== 'production') return;
   if (!process.env.DATABASE_URL) context.addIssue({ code: 'custom', path: ['DATABASE_URL'], message: 'Required in production' });

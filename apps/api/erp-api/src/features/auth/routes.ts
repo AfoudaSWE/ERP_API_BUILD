@@ -8,6 +8,7 @@ import { env } from '../../config/env.js';
 import { query, transaction } from '../../db/client.js';
 import { HttpError, validate } from '../../lib/http.js';
 import { serializeRow } from '../../lib/rows.js';
+import { sendMail } from '../../lib/mailer.js';
 import { authenticate } from './middleware.js';
 
 type UserRow = { id: string; tenant_id: string; company_id: string; email: string; password_hash: string; name: string; role: string; permissions: string[] };
@@ -42,6 +43,12 @@ authRouter.post('/login', async (request, response) => {
   const user = result.rows[0];
   if (!user || !(await bcrypt.compare(input.password, user.password_hash))) {
     throw new HttpError(401, 'INVALID_CREDENTIALS', 'Email or password is incorrect');
+  }
+  if (user.role !== 'super_admin') {
+    const company = (await query<{ subscription_status: string }>('SELECT subscription_status FROM companies WHERE id=$1', [user.company_id])).rows[0];
+    if (company?.subscription_status === 'pending_approval') {
+      throw new HttpError(402, 'PENDING_APPROVAL', 'This company is awaiting approval before it can be used');
+    }
   }
   const accessToken = signAccessToken(user);
   const refreshToken = newRefreshToken();
@@ -82,9 +89,9 @@ authRouter.post('/signup', async (request, response) => {
     ).rows[0];
     const company = (
       await client.query<{ id: string }>(
-        `INSERT INTO companies(tenant_id,name,name_ar,subscription_status,trial_ends_at)
-         VALUES($1,$2,$3,'trial',now()+($4 || ' days')::interval)RETURNING id`,
-        [tenant.id, input.companyName, input.companyNameAr, env.SIGNUP_TRIAL_DAYS],
+        `INSERT INTO companies(tenant_id,name,name_ar,subscription_status)
+         VALUES($1,$2,$3,'pending_approval')RETURNING id`,
+        [tenant.id, input.companyName, input.companyNameAr],
       )
     ).rows[0];
     const createdUser = (
@@ -112,7 +119,20 @@ authRouter.post('/signup', async (request, response) => {
     [user.id, user.tenant_id, tokenHash(refreshToken), env.REFRESH_TOKEN_DAYS],
   );
   const safeUser = { id: user.id, tenant_id: user.tenant_id, company_id: user.company_id, email: user.email, name: user.name, role: user.role, permissions };
-  response.status(201).json({ data: { accessToken, refreshToken, user: serializeRow(safeUser) } });
+  if (env.PLATFORM_APPROVAL_EMAIL) {
+    void sendMail({
+      to: env.PLATFORM_APPROVAL_EMAIL,
+      subject: `New company awaiting approval: ${input.companyName}`,
+      html: `<p>A new company signed up and is waiting for approval.</p>
+        <ul>
+          <li><strong>Company:</strong> ${input.companyName}${input.companyNameAr ? ` (${input.companyNameAr})` : ''}</li>
+          <li><strong>Owner:</strong> ${input.name}</li>
+          <li><strong>Email:</strong> ${input.email}</li>
+        </ul>
+        <p>Open the platform admin panel to approve or reject this company.</p>`,
+    });
+  }
+  response.status(201).json({ data: { accessToken, refreshToken, user: serializeRow(safeUser), pendingApproval: true } });
 });
 
 authRouter.post('/refresh', async (request, response) => {

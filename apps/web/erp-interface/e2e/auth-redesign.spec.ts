@@ -1,20 +1,20 @@
 import { test, expect } from '@playwright/test';
 
-test('login page renders the redesigned dark auth shell with no console errors', async ({ page }) => {
+test('login page renders the redesigned auth shell with no console errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: /Welcome|مرحبًا/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Welcome back|أهلاً بيك تاني/i })).toBeVisible();
   expect(errors, `console errors: ${errors.join('; ')}`).toHaveLength(0);
 });
 
-test('signup page renders the redesigned dark auth shell with no console errors', async ({ page }) => {
+test('signup page renders the redesigned auth shell with no console errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (err) => errors.push(err.message));
   page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
   await page.goto('/signup');
-  await expect(page.getByRole('heading', { name: /Your company|شركتك/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Join us today|انضم لينا النهارده/i })).toBeVisible();
   expect(errors, `console errors: ${errors.join('; ')}`).toHaveLength(0);
 });
 

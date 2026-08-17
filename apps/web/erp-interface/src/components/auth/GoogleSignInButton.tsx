@@ -14,6 +14,7 @@ declare global {
 }
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+export const isGoogleSignInAvailable = Boolean(GOOGLE_CLIENT_ID);
 let scriptPromise: Promise<void> | null = null;
 
 function loadGoogleScript() {

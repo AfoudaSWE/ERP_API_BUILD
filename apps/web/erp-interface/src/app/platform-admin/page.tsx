@@ -79,15 +79,19 @@ export default function PlatformAdminPage() {
 
   async function removeCompany(company: Company) {
     const confirmText = ar
-      ? `متأكد إنك عايز تمسح "${company.name}" نهائيًا؟ هيمسح كل بياناتها ومستخدميها ومفيش رجوع.`
-      : `Permanently delete "${company.name}"? This removes all its data and users and cannot be undone.`;
+      ? `متأكد إنك عايز تمسح "${company.name}"؟ لو مفيش نشاط مسجّل عليها هتتمسح نهائيًا، ولو فيها سجل تدقيق هيتم إلغاؤها ومنع كل مستخدميها من الدخول بدل الحذف الكامل (حفاظًا على سجل التدقيق).`
+      : `Delete "${company.name}"? If it has no recorded activity it will be permanently erased; if it has audit history it will be canceled and all its users locked out instead (to preserve the audit trail).`;
     if (!confirm(confirmText)) return;
     setBusyId(company.id);
     setError("");
     try {
-      await apiRequest(`/platform/companies/${company.id}`, { method: "DELETE" });
+      const result = await apiRequest<{ hardDeleted: boolean }>(`/platform/companies/${company.id}`, { method: "DELETE" });
       await load();
-      setMessage(ar ? "تم حذف الشركة." : "Company deleted.");
+      setMessage(
+        result.hardDeleted
+          ? (ar ? "تم حذف الشركة نهائيًا." : "Company permanently deleted.")
+          : (ar ? "الشركة عندها سجل تدقيق، فتم إلغاؤها ومنع دخول كل مستخدميها بدل الحذف الكامل." : "The company had audit history, so it was canceled and all its users were locked out instead of a hard delete."),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
     } finally {

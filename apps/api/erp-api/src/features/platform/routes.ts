@@ -76,36 +76,46 @@ platformRouter.delete("/companies/:id", async (req, res) => {
   requirePlatformAdmin(req);
   if (req.params.id === req.auth!.companyId)
     throw new HttpError(400, "CANNOT_DELETE_PLATFORM_COMPANY", "Cannot delete the platform's own company");
-  try {
-    await transaction(async (client) => {
-      const company = (
-        await client.query<{ id: string; tenant_id: string; name: string }>(
-          "SELECT id, tenant_id, name FROM companies WHERE id=$1 FOR UPDATE",
-          [req.params.id],
-        )
-      ).rows[0];
-      if (!company) throw new HttpError(404, "COMPANY_NOT_FOUND", "Company not found");
+  const hardDeleted = await transaction(async (client) => {
+    const company = (
+      await client.query<{ id: string; tenant_id: string; name: string }>(
+        "SELECT id, tenant_id, name FROM companies WHERE id=$1 FOR UPDATE",
+        [req.params.id],
+      )
+    ).rows[0];
+    if (!company) throw new HttpError(404, "COMPANY_NOT_FOUND", "Company not found");
+    const hasHistory = (
+      await client.query("SELECT 1 FROM audit_events WHERE company_id=$1 LIMIT 1", [company.id])
+    ).rowCount! > 0;
+    if (hasHistory) {
+      await client.query(
+        "UPDATE companies SET subscription_status='canceled', updated_at=now() WHERE id=$1",
+        [company.id],
+      );
+      await client.query("UPDATE users SET is_active=false WHERE company_id=$1", [company.id]);
       await appendAuditEvent(client, {
         tenantId: req.auth!.tenantId,
         companyId: req.auth!.companyId,
         actorUserId: req.auth!.userId,
-        action: "platform.company_deleted",
+        action: "platform.company_access_revoked",
         entityType: "company",
         entityId: company.id,
         before: company,
+        metadata: { reason: "delete_requested_with_preserved_audit_history" },
       });
-      await client.query("DELETE FROM tenants WHERE id=$1", [company.tenant_id]);
-    });
-  } catch (err) {
-    const dbError = err as { code?: string };
-    if (dbError.code === "23503") {
-      throw new HttpError(
-        409,
-        "COMPANY_HAS_AUDIT_HISTORY",
-        "This company has a preserved audit trail and cannot be deleted. Suspend or cancel it instead.",
-      );
+      return false;
     }
-    throw err;
-  }
-  res.status(204).send();
+    await appendAuditEvent(client, {
+      tenantId: req.auth!.tenantId,
+      companyId: req.auth!.companyId,
+      actorUserId: req.auth!.userId,
+      action: "platform.company_deleted",
+      entityType: "company",
+      entityId: company.id,
+      before: company,
+    });
+    await client.query("DELETE FROM tenants WHERE id=$1", [company.tenant_id]);
+    return true;
+  });
+  res.json({ data: { hardDeleted } });
 });

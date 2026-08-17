@@ -6,8 +6,31 @@ import { HttpError, validate } from "../../lib/http.js";
 import { serializeRow, serializeRows } from "../../lib/rows.js";
 import { authorizeAny } from "../auth/middleware.js";
 import { appendAuditEvent } from "../audit/routes.js";
+import { createCrudRouter } from "../shared/crud-router.js";
 
 export const hrRouter = Router();
+
+const optionalUuid = z.preprocess((v) => (v === "" ? undefined : v), z.uuid().nullable().optional());
+const designationSchema = z.object({ name: z.string().trim().min(2).max(120), nameAr: z.string().trim().max(120).default(""), departmentId: optionalUuid, isActive: z.boolean().default(true) });
+const holidaySchema = z.object({ name: z.string().trim().min(2).max(120), nameAr: z.string().trim().max(120).default(""), holidayDate: z.string().date(), isActive: z.boolean().default(true) });
+const boolFromString = z.preprocess((v) => (v === "true" ? true : v === "false" ? false : v), z.boolean());
+const leaveTypeSchema = z.object({ name: z.string().trim().min(2).max(120), nameAr: z.string().trim().max(120).default(""), paid: boolFromString.default(true), defaultDays: z.coerce.number().int().min(0).max(365).default(0), isActive: z.boolean().default(true) });
+const leaveRequestSchema = z.object({ employeeId: z.uuid(), leaveTypeId: z.uuid(), startDate: z.string().date(), endDate: z.string().date(), days: z.coerce.number().positive().max(365), reason: z.string().trim().max(500).default("") });
+const leaveActionSchema = z.object({ action: z.enum(["approve", "reject", "cancel"]) });
+const jobOpeningSchema = z.object({ title: z.string().trim().min(2).max(160), departmentId: optionalUuid, description: z.string().trim().max(2000).default(""), isActive: z.boolean().default(true) });
+const candidateSchema = z.object({ jobOpeningId: z.uuid(), name: z.string().trim().min(2).max(160), email: z.email().nullable().optional(), phone: z.string().trim().max(30).nullable().optional(), notes: z.string().trim().max(1000).default("") });
+const candidateStageSchema = z.object({ stage: z.enum(["applied", "screening", "interview", "offer", "hired", "rejected"]) });
+const performanceReviewSchema = z.object({ employeeId: z.uuid(), reviewPeriod: z.string().trim().min(2).max(60), rating: z.coerce.number().min(0).max(5), comments: z.string().trim().max(2000).default(""), reviewDate: z.string().date() });
+const trainingCourseSchema = z.object({ name: z.string().trim().min(2).max(160), nameAr: z.string().trim().max(160).default(""), isActive: z.boolean().default(true) });
+const trainingEnrollmentSchema = z.object({ courseId: z.uuid(), employeeId: z.uuid(), status: z.enum(["enrolled", "completed"]).default("enrolled") });
+
+hrRouter.use("/designations", createCrudRouter({ table: "hr_designations", permissionBase: "hr", schema: designationSchema, searchColumns: ["name", "name_ar"], columns: { name: "name", nameAr: "name_ar", departmentId: "department_id", isActive: "is_active" } }));
+hrRouter.use("/holidays", createCrudRouter({ table: "attendance_holidays", permissionBase: "hr", schema: holidaySchema, searchColumns: ["name", "name_ar"], columns: { name: "name", nameAr: "name_ar", holidayDate: "holiday_date", isActive: "is_active" } }));
+hrRouter.use("/leave-types", createCrudRouter({ table: "leave_types", permissionBase: "hr", schema: leaveTypeSchema, searchColumns: ["name", "name_ar"], columns: { name: "name", nameAr: "name_ar", paid: "paid", defaultDays: "default_days", isActive: "is_active" } }));
+hrRouter.use("/job-openings", createCrudRouter({ table: "job_openings", permissionBase: "hr", schema: jobOpeningSchema, searchColumns: ["title"], columns: { title: "title", departmentId: "department_id", description: "description", isActive: "is_active" } }));
+hrRouter.use("/performance-reviews", createCrudRouter({ table: "performance_reviews", permissionBase: "hr", schema: performanceReviewSchema, searchColumns: ["review_period"], columns: { employeeId: "employee_id", reviewPeriod: "review_period", rating: "rating", comments: "comments", reviewDate: "review_date" } }));
+hrRouter.use("/training-courses", createCrudRouter({ table: "training_courses", permissionBase: "hr", schema: trainingCourseSchema, searchColumns: ["name", "name_ar"], columns: { name: "name", nameAr: "name_ar", isActive: "is_active" } }));
+hrRouter.use("/training-enrollments", createCrudRouter({ table: "training_enrollments", permissionBase: "hr", schema: trainingEnrollmentSchema, searchColumns: [], columns: { courseId: "course_id", employeeId: "employee_id", status: "status" } }));
 const branchSchema = z.object({
   code: z
     .string()
@@ -614,3 +637,42 @@ hrRouter.post(
     res.status(201).json({ data: serializeRow(row) });
   },
 );
+
+hrRouter.get("/leave-requests", authorizeAny("hr.read", "hr.write"), async (req, res) => {
+  const rows = (await query(`SELECT lr.*,u.name employee_name,lt.name leave_type_name FROM leave_requests lr JOIN users u ON u.id=lr.employee_id JOIN leave_types lt ON lt.id=lr.leave_type_id WHERE lr.company_id=$1 ORDER BY lr.start_date DESC,lr.created_at DESC LIMIT 100`, [req.auth!.companyId])).rows;
+  res.json({ data: serializeRows(rows) });
+});
+hrRouter.post("/leave-requests", authorizeAny("hr.read", "hr.write"), async (req, res) => {
+  const i = validate(leaveRequestSchema, req.body);
+  const row = (await query(`INSERT INTO leave_requests(company_id,employee_id,leave_type_id,start_date,end_date,days,reason,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`, [req.auth!.companyId, i.employeeId, i.leaveTypeId, i.startDate, i.endDate, i.days, i.reason, req.auth!.userId])).rows[0];
+  res.status(201).json({ data: serializeRow(row) });
+});
+hrRouter.post("/leave-requests/:id/actions", authorizeAny("hr.write"), async (req, res) => {
+  const id = req.params.id;
+  const i = validate(leaveActionSchema, req.body);
+  const before = (await query("SELECT * FROM leave_requests WHERE id=$1 AND company_id=$2 FOR UPDATE", [id, req.auth!.companyId])).rows[0];
+  if (!before) throw new HttpError(404, "NOT_FOUND", "Leave request not found");
+  if (before.status !== "pending") throw new HttpError(409, "INVALID_STATE", `Cannot ${i.action} a request in status ${before.status}`);
+  const nextStatus = { approve: "approved", reject: "rejected", cancel: "canceled" }[i.action];
+  const row = (await query("UPDATE leave_requests SET status=$2,approved_by=$3,decided_at=now(),updated_at=now() WHERE id=$1 RETURNING *", [id, nextStatus, req.auth!.userId])).rows[0];
+  res.json({ data: serializeRow(row) });
+});
+
+hrRouter.get("/candidates", authorizeAny("hr.read", "hr.write"), async (req, res) => {
+  const values: unknown[] = [req.auth!.companyId];
+  let where = "c.company_id=$1";
+  if (req.query.jobOpeningId) { values.push(req.query.jobOpeningId); where += ` AND c.job_opening_id=$${values.length}`; }
+  const rows = (await query(`SELECT c.*,j.title job_title FROM candidates c JOIN job_openings j ON j.id=c.job_opening_id WHERE ${where} ORDER BY c.created_at DESC LIMIT 200`, values)).rows;
+  res.json({ data: serializeRows(rows) });
+});
+hrRouter.post("/candidates", authorizeAny("hr.read", "hr.write"), async (req, res) => {
+  const i = validate(candidateSchema, req.body);
+  const row = (await query(`INSERT INTO candidates(company_id,job_opening_id,name,email,phone,notes) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`, [req.auth!.companyId, i.jobOpeningId, i.name, i.email ?? null, i.phone ?? null, i.notes])).rows[0];
+  res.status(201).json({ data: serializeRow(row) });
+});
+hrRouter.patch("/candidates/:id/stage", authorizeAny("hr.write"), async (req, res) => {
+  const i = validate(candidateStageSchema, req.body);
+  const row = (await query("UPDATE candidates SET stage=$2,updated_at=now() WHERE id=$1 AND company_id=$3 RETURNING *", [req.params.id, i.stage, req.auth!.companyId])).rows[0];
+  if (!row) throw new HttpError(404, "NOT_FOUND", "Candidate not found");
+  res.json({ data: serializeRow(row) });
+});

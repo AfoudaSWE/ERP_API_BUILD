@@ -11,10 +11,28 @@ import BrandsPage from "@/app/brands/page";
 import CashBanksPage from "@/app/cash-banks/page";
 import CategoriesPage from "@/app/categories/page";
 import CRMPage from "@/app/crm/page";
+import ContactsPage from "@/app/crm/contacts/page";
+import PipelinePage from "@/app/crm/pipeline/page";
+import CampaignsPage from "@/app/crm/campaigns/page";
+import CustomerFeedbackPage from "@/app/crm/feedback/page";
+import CustomerAnalyticsPage from "@/app/crm/analytics/page";
 import CustomersPage from "@/app/customers/page";
 import ExpensesPage from "@/app/expenses/page";
+import ExpenseCategoriesPage from "@/app/expenses/categories/page";
+import TaxRatesPage from "@/app/finance/tax-rates/page";
+import BudgetsPage from "@/app/finance/budgets/page";
+import PaymentsPage from "@/app/finance/payments/page";
+import CashflowPage from "@/app/finance/cashflow/page";
 import HelpPage from "@/app/help/page";
 import HRPage from "@/app/hr/page";
+import DesignationsPage from "@/app/hr/designations/page";
+import LeavesPage from "@/app/hr/leaves/page";
+import LeaveTypesPage from "@/app/hr/leave-types/page";
+import HolidaysPage from "@/app/hr/holidays/page";
+import RecruitmentPage from "@/app/hr/recruitment/page";
+import PerformancePage from "@/app/hr/performance/page";
+import TrainingPage from "@/app/hr/training/page";
+import HrAnalyticsPage from "@/app/hr/analytics/page";
 import InventoryPage from "@/app/inventory/page";
 import StockAdjustmentPage from "@/app/inventory/stock-adjustment/page";
 import StockTransferPage from "@/app/inventory/stock-transfer/page";
@@ -274,6 +292,46 @@ export default function App() {
             }
           />
           <Route
+            path="/crm/contacts"
+            element={
+              <PermissionRoute permission="crm.read">
+                <ContactsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/crm/pipeline"
+            element={
+              <PermissionRoute permission="crm.read">
+                <PipelinePage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/crm/campaigns"
+            element={
+              <PermissionRoute permission="crm.read">
+                <CampaignsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/crm/feedback"
+            element={
+              <PermissionRoute permission="crm.read">
+                <CustomerFeedbackPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/crm/analytics"
+            element={
+              <PermissionRoute permission="crm.read">
+                <CustomerAnalyticsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
             path="/crm/*"
             element={
               <PermissionRoute permission="crm.read">
@@ -306,10 +364,50 @@ export default function App() {
             }
           />
           <Route
+            path="/expenses/categories"
+            element={
+              <PermissionRoute permission="expenses.read">
+                <ExpenseCategoriesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
             path="/expenses/*"
             element={
               <PermissionRoute permission="expenses.read">
                 <EntityRoute module="expenses" />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/finance/tax-rates"
+            element={
+              <PermissionRoute permission="accounting.read">
+                <TaxRatesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/finance/budgets"
+            element={
+              <PermissionRoute permission="accounting.read">
+                <BudgetsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/finance/payments"
+            element={
+              <PermissionRoute permission="expenses.read">
+                <PaymentsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/finance/cashflow"
+            element={
+              <PermissionRoute permission="accounting.read">
+                <CashflowPage />
               </PermissionRoute>
             }
           />
@@ -326,6 +424,70 @@ export default function App() {
             element={
               <PermissionRoute permission="hr.read">
                 <HRPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/designations"
+            element={
+              <PermissionRoute permission="hr.read">
+                <DesignationsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/leaves"
+            element={
+              <PermissionRoute permission="hr.read">
+                <LeavesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/leave-types"
+            element={
+              <PermissionRoute permission="hr.read">
+                <LeaveTypesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/holidays"
+            element={
+              <PermissionRoute permission="hr.read">
+                <HolidaysPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/recruitment"
+            element={
+              <PermissionRoute permission="hr.read">
+                <RecruitmentPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/performance"
+            element={
+              <PermissionRoute permission="hr.read">
+                <PerformancePage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/training"
+            element={
+              <PermissionRoute permission="hr.read">
+                <TrainingPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/hr/analytics"
+            element={
+              <PermissionRoute permission="hr.read">
+                <HrAnalyticsPage />
               </PermissionRoute>
             }
           />

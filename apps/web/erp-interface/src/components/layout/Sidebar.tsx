@@ -8,6 +8,8 @@ import {
   Boxes, Building, UserPlus, ShieldAlert, Tag, Award, Ruler, Warehouse,
   ClipboardList, ClipboardEdit, ArrowRightLeft, FileText, Repeat, FileStack,
   Undo2, FileSpreadsheet, CircleDollarSign, Truck as TruckIcon, PackageMinus, LineChart,
+  CreditCard, TrendingUp, PiggyBank, Percent, IdCard, CalendarDays, CalendarOff,
+  Briefcase, BookOpen, Contact, Kanban, Megaphone, MessageSquareHeart, Star,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Locale } from '@/lib/i18n';
@@ -91,6 +93,44 @@ const purchaseSectionItems: NavItem[] = [
   { href: '/reports', icon: <LineChart className="h-4 w-4" />, labelKey: 'nav.procurementAnalytics', permission: 'reports.read' },
 ];
 
+const financeSectionItems: NavItem[] = [
+  { href: '/expenses', icon: <Receipt className="h-4 w-4" />, labelKey: 'nav.expenses', permission: 'expenses.read' },
+  { href: '/expenses/categories', icon: <Tag className="h-4 w-4" />, labelKey: 'nav.expenseCategory', permission: 'expenses.read' },
+  { href: '/finance/payments', icon: <CreditCard className="h-4 w-4" />, labelKey: 'nav.payments', permission: 'expenses.read' },
+  { href: '/finance/cashflow', icon: <TrendingUp className="h-4 w-4" />, labelKey: 'nav.cashflow', permission: 'accounting.read' },
+  { href: '/finance/budgets', icon: <PiggyBank className="h-4 w-4" />, labelKey: 'nav.budgeting', permission: 'accounting.read' },
+  { href: '/finance/tax-rates', icon: <Percent className="h-4 w-4" />, labelKey: 'nav.taxes', permission: 'accounting.read' },
+  { href: '/reports', icon: <BarChart3 className="h-4 w-4" />, labelKey: 'nav.reports', permission: 'reports.read' },
+];
+
+const hrmSectionItems: NavItem[] = [
+  { href: '/hr', icon: <UserCog className="h-4 w-4" />, labelKey: 'nav.employees', permission: 'hr.read' },
+  { href: '/hr', icon: <Building className="h-4 w-4" />, labelKey: 'nav.departments', permission: 'hr.read' },
+  { href: '/hr/designations', icon: <IdCard className="h-4 w-4" />, labelKey: 'nav.designations', permission: 'hr.read' },
+  { href: '/attendance', icon: <Clock className="h-4 w-4" />, labelKey: 'nav.attendance', permission: 'attendance.records.view' },
+  { href: '/hr/holidays', icon: <CalendarOff className="h-4 w-4" />, labelKey: 'nav.holidays', permission: 'hr.read' },
+  { href: '/payroll', icon: <Banknote className="h-4 w-4" />, labelKey: 'nav.payroll', permission: 'payroll.read' },
+  { href: '/hr/recruitment', icon: <Briefcase className="h-4 w-4" />, labelKey: 'nav.recruitment', permission: 'hr.read' },
+  { href: '/hr/performance', icon: <Star className="h-4 w-4" />, labelKey: 'nav.performance', permission: 'hr.read' },
+  { href: '/hr/training', icon: <BookOpen className="h-4 w-4" />, labelKey: 'nav.training', permission: 'hr.read' },
+  { href: '/hr/analytics', icon: <TrendingUp className="h-4 w-4" />, labelKey: 'nav.hrAnalytics', permission: 'hr.read' },
+];
+
+const leaveGroupItems: NavItem[] = [
+  { href: '/hr/leaves', icon: <CalendarDays className="h-4 w-4" />, labelKey: 'nav.leaves', permission: 'hr.read' },
+  { href: '/hr/leave-types', icon: <FileStack className="h-4 w-4" />, labelKey: 'nav.leaveTypes', permission: 'hr.read' },
+];
+
+const crmSectionItems: NavItem[] = [
+  { href: '/crm/contacts', icon: <Contact className="h-4 w-4" />, labelKey: 'nav.contacts', permission: 'crm.read' },
+  { href: '/crm', icon: <UserPlus className="h-4 w-4" />, labelKey: 'nav.leads', permission: 'crm.read' },
+  { href: '/crm', icon: <ShoppingBag className="h-4 w-4" />, labelKey: 'nav.deals', permission: 'crm.read' },
+  { href: '/crm/pipeline', icon: <Kanban className="h-4 w-4" />, labelKey: 'nav.pipeline', permission: 'crm.read' },
+  { href: '/crm/campaigns', icon: <Megaphone className="h-4 w-4" />, labelKey: 'nav.campaigns', permission: 'crm.read' },
+  { href: '/crm/feedback', icon: <MessageSquareHeart className="h-4 w-4" />, labelKey: 'nav.customerFeedback', permission: 'crm.read' },
+  { href: '/crm/analytics', icon: <LineChart className="h-4 w-4" />, labelKey: 'nav.customerAnalytics', permission: 'crm.read' },
+];
+
 export function Sidebar({
   locale,
   isDesktopCollapsed,
@@ -119,6 +159,21 @@ export function Sidebar({
   const visiblePurchaseItems = purchaseSectionItems.filter((item) => can(item.permission));
   const showPurchaseSection = user?.role !== 'super_admin' && visiblePurchaseItems.length > 0;
   const purchasesIndex = navItems.findIndex((item) => item.href === '/purchases');
+
+  const visibleFinanceItems = financeSectionItems.filter((item) => can(item.permission));
+  const showFinanceSection = user?.role !== 'super_admin' && visibleFinanceItems.length > 0;
+  const expensesIndex = navItems.findIndex((item) => item.href === '/expenses');
+
+  const visibleHrmItems = hrmSectionItems.filter((item) => can(item.permission));
+  const visibleLeaveItems = leaveGroupItems.filter((item) => can(item.permission));
+  const isLeaveActive = pathname.startsWith('/hr/leave');
+  const [leaveOpen, setLeaveOpen] = useState(isLeaveActive);
+  const showHrmSection = user?.role !== 'super_admin' && (visibleHrmItems.length > 0 || visibleLeaveItems.length > 0);
+  const hrIndex = navItems.findIndex((item) => item.href === '/hr');
+
+  const visibleCrmItems = crmSectionItems.filter((item) => can(item.permission));
+  const showCrmSection = user?.role !== 'super_admin' && visibleCrmItems.length > 0;
+  const crmIndex = navItems.findIndex((item) => item.href === '/crm');
 
   return (
     <>
@@ -175,7 +230,10 @@ export function Sidebar({
             const isCustomersAnchor = item.href === '/customers' && showInventorySection;
             const isSalesAnchor = item.href === '/sales' && showSalesSection;
             const isPurchasesAnchor = item.href === '/purchases' && showPurchaseSection;
-            if (!can(item.permission) && !isCustomersAnchor && !isSalesAnchor && !isPurchasesAnchor) return null;
+            const isExpensesAnchor = item.href === '/expenses' && showFinanceSection;
+            const isHrAnchor = item.href === '/hr' && showHrmSection;
+            const isCrmAnchor = item.href === '/crm' && showCrmSection;
+            if (!can(item.permission) && !isCustomersAnchor && !isSalesAnchor && !isPurchasesAnchor && !isExpensesAnchor && !isHrAnchor && !isCrmAnchor) return null;
 
             if (index === salesIndex && showSalesSection) {
               return (
@@ -202,6 +260,77 @@ export function Sidebar({
                   t={t}
                   onClick={onMobileClose}
                 />
+              );
+            }
+
+            if (index === expensesIndex && showFinanceSection) {
+              return (
+                <ExpandableSection
+                  key="finance-section"
+                  title={isRTL ? 'المالية' : 'Finance'}
+                  items={visibleFinanceItems}
+                  pathname={pathname}
+                  isDesktopCollapsed={isDesktopCollapsed}
+                  t={t}
+                  onClick={onMobileClose}
+                />
+              );
+            }
+
+            if (index === crmIndex && showCrmSection) {
+              return (
+                <ExpandableSection
+                  key="crm-section"
+                  title={isRTL ? 'إدارة العملاء' : 'CRM'}
+                  items={visibleCrmItems}
+                  pathname={pathname}
+                  isDesktopCollapsed={isDesktopCollapsed}
+                  t={t}
+                  onClick={onMobileClose}
+                />
+              );
+            }
+
+            if (index === hrIndex && showHrmSection) {
+              return (
+                <div key="hrm-section" className="contents">
+                  {!isDesktopCollapsed && (
+                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-navy-400 dark:text-navy-500">
+                      {isRTL ? 'الموارد البشرية' : 'HRM'}
+                    </p>
+                  )}
+                  {visibleHrmItems.map((leaf, leafIndex) => (
+                    <div key={`${leaf.href}-${leaf.labelKey}-${leafIndex}`} className="contents">
+                      <SidebarLink item={leaf} pathname={pathname} isDesktopCollapsed={isDesktopCollapsed} t={t} onClick={onMobileClose} />
+                      {leaf.labelKey === 'nav.designations' && visibleLeaveItems.length > 0 && (
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => setLeaveOpen((open) => !open)}
+                            className={cn('sidebar-link w-full', isLeaveActive && 'active', isDesktopCollapsed && 'lg:justify-center lg:px-2')}
+                            title={isDesktopCollapsed ? (isRTL ? 'الإجازات' : 'Leave') : undefined}
+                            aria-expanded={leaveOpen}
+                          >
+                            <span className={cn('shrink-0', isLeaveActive && 'text-primary-600 dark:text-primary-400')}>
+                              <CalendarDays className="h-5 w-5" />
+                            </span>
+                            <span className={cn('flex-1 truncate text-start', isDesktopCollapsed && 'lg:hidden')}>
+                              {isRTL ? 'الإجازات' : 'Leave'}
+                            </span>
+                            <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform', leaveOpen && 'rotate-180', isDesktopCollapsed && 'lg:hidden')} />
+                          </button>
+                          {leaveOpen && !isDesktopCollapsed && (
+                            <div className="ms-4 mt-1 space-y-1 border-s border-navy-200 ps-3 dark:border-navy-700">
+                              {visibleLeaveItems.map((sub) => (
+                                <SidebarLink key={sub.href} item={sub} pathname={pathname} isDesktopCollapsed={false} t={t} onClick={onMobileClose} small />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               );
             }
 
@@ -248,7 +377,13 @@ export function Sidebar({
                 </div>
               );
             }
-            if (item.href === '/sales' || item.href === '/purchases') return null;
+            if (
+              (item.href === '/sales' && showSalesSection) ||
+              (item.href === '/purchases' && showPurchaseSection) ||
+              (item.href === '/expenses' && showFinanceSection) ||
+              (item.href === '/hr' && showHrmSection) ||
+              (item.href === '/crm' && showCrmSection)
+            ) return null;
             return <SidebarLink key={item.href} item={item} pathname={pathname} isDesktopCollapsed={isDesktopCollapsed} t={t} onClick={onMobileClose} />;
           })}
         </nav>

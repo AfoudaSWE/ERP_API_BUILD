@@ -6,11 +6,13 @@ import { serializeRow, serializeRows } from '../../lib/rows.js';
 import { authorizeAny } from '../auth/middleware.js';
 
 interface CrudConfig<T extends ZodRawShape> {
-  table: 'customers' | 'suppliers' | 'products' | 'categories' | 'brands';
+  table: 'customers' | 'suppliers' | 'products' | 'categories' | 'brands' | 'expense_categories' | 'tax_rates'
+    | 'hr_designations' | 'attendance_holidays' | 'leave_types' | 'training_courses' | 'training_enrollments'
+    | 'performance_reviews' | 'job_openings' | 'campaigns' | 'customer_feedback';
   schema: ZodObject<T>;
   columns: Record<string, string>;
   searchColumns: string[];
-  permissionBase: 'products' | 'customers' | 'suppliers';
+  permissionBase: 'products' | 'customers' | 'suppliers' | 'expenses' | 'accounting' | 'hr' | 'crm';
 }
 
 const paginationSchema = z.object({

@@ -4,6 +4,7 @@ import { apiRequest } from "@erp/shared-frontend-data-access";
 
 export type ExtraField =
   | { key: string; label: string; labelAr: string; type: "text"; required?: boolean }
+  | { key: string; label: string; labelAr: string; type: "date"; required?: boolean }
   | { key: string; label: string; labelAr: string; type: "number"; defaultValue?: number }
   | { key: string; label: string; labelAr: string; type: "select"; options: { value: string; label: string; labelAr: string }[] };
 
@@ -123,7 +124,7 @@ export function CatalogCrud({
                   name={field.key}
                   type={field.type}
                   defaultValue={(current as string | number | undefined) ?? (field.type === "number" ? field.defaultValue : undefined)}
-                  required={field.type === "text" && field.required}
+                  required={(field.type === "text" || field.type === "date") && field.required}
                 />
               </label>
             );

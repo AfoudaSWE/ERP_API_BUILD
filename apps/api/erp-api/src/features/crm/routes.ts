@@ -5,6 +5,24 @@ import { query } from '../../db/client.js';
 import { HttpError, validate } from '../../lib/http.js';
 import { serializeRow, serializeRows } from '../../lib/rows.js';
 import { authorizeAny } from '../auth/middleware.js';
+import { createCrudRouter } from '../shared/crud-router.js';
+
+const campaignSchema = z.object({
+  name: z.string().trim().min(2).max(160),
+  channel: z.enum(['email', 'social_media', 'sms', 'event', 'other']).default('other'),
+  startDate: z.string().date().nullable().optional(),
+  endDate: z.string().date().nullable().optional(),
+  budget: z.coerce.number().min(0).default(0),
+  status: z.enum(['planned', 'active', 'completed', 'canceled']).default('planned'),
+  notes: z.string().trim().max(1000).default(''),
+});
+const customerFeedbackSchema = z.object({
+  customerId: z.uuid().nullable().optional(),
+  customerName: z.string().trim().max(160).default(''),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().trim().max(1000).default(''),
+  feedbackDate: z.string().date(),
+});
 
 const paginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -17,6 +35,14 @@ const columns: Record<string, string> = {
 };
 
 export const crmRouter = Router();
+crmRouter.use('/campaigns', createCrudRouter({
+  table: 'campaigns', permissionBase: 'crm', schema: campaignSchema, searchColumns: ['name'],
+  columns: { name: 'name', channel: 'channel', startDate: 'start_date', endDate: 'end_date', budget: 'budget', status: 'status', notes: 'notes' },
+}));
+crmRouter.use('/customer-feedback', createCrudRouter({
+  table: 'customer_feedback', permissionBase: 'crm', schema: customerFeedbackSchema, searchColumns: ['customer_name', 'comment'],
+  columns: { customerId: 'customer_id', customerName: 'customer_name', rating: 'rating', comment: 'comment', feedbackDate: 'feedback_date' },
+}));
 
 crmRouter.get('/leads', authorizeAny('crm.read', 'crm.write'), async (request, response) => {
   const { page, pageSize } = validate(paginationSchema, request.query);

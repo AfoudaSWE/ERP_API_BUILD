@@ -4,7 +4,8 @@ import { translations } from './i18n';
 
 const en = {
   ...translations.en,
-  'nav.dashboard': 'Dashboard', 'nav.aiAssistant': 'AI Assistant', 'nav.sales': 'Sales', 'nav.pos': 'Point of Sale',
+  'nav.dashboard': 'Dashboard', 'nav.aiAssistant': 'AI Assistant', 'nav.sales': 'Sales', 'nav.pos': 'POS',
+  'nav.posOrders': 'POS Orders', 'nav.barcodePrint': 'Barcode Print', 'nav.qrCodePrint': 'QR Code Print',
   'nav.purchases': 'Purchases', 'nav.inventory': 'Inventory', 'nav.products': 'Products', 'nav.customers': 'Customers',
   'nav.suppliers': 'Suppliers', 'nav.crm': 'CRM', 'nav.accounting': 'Accounting', 'nav.expenses': 'Expenses',
   'nav.cashBanks': 'Cash & Banks', 'nav.hr': 'Human Resources', 'nav.attendance': 'Attendance', 'nav.payroll': 'Payroll',
@@ -41,6 +42,7 @@ const en = {
 const ar: Record<keyof typeof en, string> = {
   ...translations.ar,
   'nav.dashboard': 'لوحة التحكم', 'nav.aiAssistant': 'المساعد الذكي', 'nav.sales': 'المبيعات', 'nav.pos': 'نقطة البيع',
+  'nav.posOrders': 'طلبات نقطة البيع', 'nav.barcodePrint': 'طباعة الباركود', 'nav.qrCodePrint': 'طباعة رمز QR',
   'nav.purchases': 'المشتريات', 'nav.inventory': 'المخزون', 'nav.products': 'المنتجات', 'nav.customers': 'العملاء',
   'nav.suppliers': 'الموردون', 'nav.crm': 'إدارة العملاء', 'nav.accounting': 'المحاسبة', 'nav.expenses': 'المصروفات',
   'nav.cashBanks': 'الخزينة والبنوك', 'nav.hr': 'الموارد البشرية', 'nav.attendance': 'الحضور والانصراف', 'nav.payroll': 'الرواتب',

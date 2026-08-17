@@ -19,10 +19,11 @@ import { requireDocumentWarehouseAccess, requireWarehouseAccess, warehouseScopeS
 
 export const salesRouter = Router();
 
-salesRouter.get('/invoices', authorizeAny('sales.view', 'sales.read'), async (request, response) => {
+salesRouter.get('/invoices', authorizeAny('sales.view', 'sales.read', 'pos.use'), async (request, response) => {
   const values: unknown[] = [request.auth!.companyId];
   let scope = warehouseScopeSql(request.auth!, 'i.warehouse_id', values);
   if (request.query.paymentMethod) { values.push(request.query.paymentMethod); scope += ` AND EXISTS (SELECT 1 FROM payment_allocations a JOIN customer_payments p ON p.id=a.payment_id WHERE a.invoice_id=i.id AND p.method=$${values.length})`; }
+  if (request.query.source) { values.push(request.query.source); scope += ` AND i.source = $${values.length}`; }
   const result = await query(
     `SELECT i.*, c.name AS customer_name
      FROM sales_invoices i LEFT JOIN customers c ON c.id = i.customer_id
@@ -31,7 +32,7 @@ salesRouter.get('/invoices', authorizeAny('sales.view', 'sales.read'), async (re
   response.json({ data: serializeRows(result.rows) });
 });
 
-salesRouter.get('/invoices/:id', authorizeAny('sales.view', 'sales.read'), async (request, response) => {
+salesRouter.get('/invoices/:id', authorizeAny('sales.view', 'sales.read', 'pos.use'), async (request, response) => {
   await requireDocumentWarehouseAccess({ query }, request.auth!, 'sales_invoices', String(request.params.id));
   const invoice = await query('SELECT * FROM sales_invoices WHERE id = $1 AND company_id = $2', [request.params.id, request.auth!.companyId]);
   if (!invoice.rows[0]) throw new HttpError(404, 'NOT_FOUND', 'Invoice not found');

@@ -10,6 +10,7 @@ import {
   Undo2, FileSpreadsheet, CircleDollarSign, Truck as TruckIcon, PackageMinus, LineChart,
   CreditCard, TrendingUp, PiggyBank, Percent, IdCard, CalendarDays, CalendarOff,
   Briefcase, BookOpen, Contact, Kanban, Megaphone, MessageSquareHeart, Star,
+  Monitor, Layers, Barcode, QrCode,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Locale } from '@/lib/i18n';
@@ -89,6 +90,13 @@ const salesSectionItems: NavItem[] = [
   { href: '/reports', icon: <LineChart className="h-4 w-4" />, labelKey: 'nav.salesAnalytics', permission: 'reports.read' },
 ];
 
+const posSectionItems: NavItem[] = [
+  { href: '/pos', icon: <Monitor className="h-4 w-4" />, labelKey: 'nav.pos', permission: 'pos.use' },
+  { href: '/pos/orders', icon: <Layers className="h-4 w-4" />, labelKey: 'nav.posOrders', permission: 'pos.use' },
+  { href: '/pos/barcode-print', icon: <Barcode className="h-4 w-4" />, labelKey: 'nav.barcodePrint', permission: 'pos.use' },
+  { href: '/pos/qr-print', icon: <QrCode className="h-4 w-4" />, labelKey: 'nav.qrCodePrint', permission: 'pos.use' },
+];
+
 const purchaseSectionItems: NavItem[] = [
   { href: '/purchases', icon: <ShoppingBag className="h-4 w-4" />, labelKey: 'nav.purchases', permission: 'purchases.read' },
   { href: '/purchases', icon: <ClipboardList className="h-4 w-4" />, labelKey: 'nav.purchaseOrders', permission: 'purchases.read' },
@@ -155,6 +163,10 @@ export function Sidebar({
   const [stockOpen, setStockOpen] = useState(isStockActive);
   const showInventorySection = user?.role !== 'super_admin' && (visibleInventoryItems.length > 0 || visibleStockItems.length > 0);
   const customersIndex = navItems.findIndex((item) => item.href === '/customers');
+
+  const visiblePosItems = posSectionItems.filter((item) => can(item.permission));
+  const showPosSection = user?.role !== 'super_admin' && visiblePosItems.length > 0;
+  const posIndex = navItems.findIndex((item) => item.href === '/pos');
 
   const visibleSalesItems = salesSectionItems.filter((item) => can(item.permission));
   const showSalesSection = user?.role !== 'super_admin' && visibleSalesItems.length > 0;
@@ -238,12 +250,27 @@ export function Sidebar({
         >
           {(user?.role === 'super_admin' ? navItems.filter((item) => item.href === '/platform-admin') : navItems).map((item, index) => {
             const isCustomersAnchor = item.href === '/customers' && showInventorySection;
+            const isPosAnchor = item.href === '/pos' && showPosSection;
             const isSalesAnchor = item.href === '/sales' && showSalesSection;
             const isPurchasesAnchor = item.href === '/purchases' && showPurchaseSection;
             const isExpensesAnchor = item.href === '/expenses' && showFinanceSection;
             const isHrAnchor = item.href === '/hr' && showHrmSection;
             const isCrmAnchor = item.href === '/crm' && showCrmSection;
-            if (!can(item.permission) && !isCustomersAnchor && !isSalesAnchor && !isPurchasesAnchor && !isExpensesAnchor && !isHrAnchor && !isCrmAnchor) return null;
+            if (!can(item.permission) && !isCustomersAnchor && !isPosAnchor && !isSalesAnchor && !isPurchasesAnchor && !isExpensesAnchor && !isHrAnchor && !isCrmAnchor) return null;
+
+            if (index === posIndex && showPosSection) {
+              return (
+                <ExpandableSection
+                  key="pos-section"
+                  title={isRTL ? 'نقطة البيع' : 'POS'}
+                  items={visiblePosItems}
+                  pathname={pathname}
+                  isDesktopCollapsed={isDesktopCollapsed}
+                  t={t}
+                  onClick={onMobileClose}
+                />
+              );
+            }
 
             if (index === salesIndex && showSalesSection) {
               return (
@@ -388,6 +415,7 @@ export function Sidebar({
               );
             }
             if (
+              (item.href === '/pos' && showPosSection) ||
               (item.href === '/sales' && showSalesSection) ||
               (item.href === '/purchases' && showPurchaseSection) ||
               (item.href === '/expenses' && showFinanceSection) ||

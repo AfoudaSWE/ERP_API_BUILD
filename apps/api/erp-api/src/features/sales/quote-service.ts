@@ -62,6 +62,7 @@ export async function convertQuoteToInvoice(client: PoolClient, auth: Express.Re
     discountAmount: quote.discount_amount,
     initialPayment: '0',
     paymentMethod,
+    source: 'erp',
     items: items.map((item) => ({ productId: item.product_id as string, description: item.description, quantity: item.quantity, unitPrice: item.unit_price, taxRate: item.tax_rate })),
   };
   const result = await postSalesInvoice(client, auth, operationKey, invoiceInput);

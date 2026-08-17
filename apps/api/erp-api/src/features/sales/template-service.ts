@@ -41,6 +41,7 @@ export async function createInvoiceFromTemplate(client: PoolClient, auth: Expres
     discountAmount: '0',
     initialPayment: '0',
     paymentMethod: input.paymentMethod,
+    source: 'erp',
     items: items.map((item) => ({ productId: item.product_id as string, description: item.description, quantity: item.quantity, unitPrice: item.unit_price, taxRate: item.tax_rate })),
   };
   return postSalesInvoice(client, auth, operationKey, invoiceInput);

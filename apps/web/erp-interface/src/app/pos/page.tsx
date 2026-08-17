@@ -114,7 +114,7 @@ export default function POSPage() {
         customerId: selectedCustomer?.id,
         customerName: selectedCustomer ? (isRTL ? selectedCustomer.nameAr || selectedCustomer.name : selectedCustomer.name) : undefined,
         invoiceDate: new Date().toISOString().slice(0, 10),
-        currency: 'EGP', discountAmount: discountAmount.toFixed(2), initialPayment: total.toFixed(2), paymentMethod,
+        currency: 'EGP', discountAmount: discountAmount.toFixed(2), initialPayment: total.toFixed(2), paymentMethod, source: 'pos',
         items: cart.map(({ product, quantity }) => ({ productId: product.id, description: isRTL ? product.nameAr || product.name : product.name, quantity: quantity.toFixed(3), unitPrice: Number(product.sellingPrice).toFixed(2), taxRate: Number(product.taxRate).toFixed(4) })),
       }) });
       clearCart(); setCashReceived(''); await refresh();

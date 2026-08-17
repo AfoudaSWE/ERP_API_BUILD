@@ -47,6 +47,7 @@ export async function generateInvoiceFromRecurringTemplate(client: PoolClient, a
     discountAmount: '0',
     initialPayment: '0',
     paymentMethod: 'cash',
+    source: 'erp',
     items: items.map((item) => ({ productId: item.product_id as string, description: item.description, quantity: item.quantity, unitPrice: item.unit_price, taxRate: item.tax_rate })),
   };
   const result = await postSalesInvoice(client, auth, operationKey, invoiceInput);

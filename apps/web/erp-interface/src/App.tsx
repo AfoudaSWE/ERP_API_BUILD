@@ -39,6 +39,9 @@ import StockTransferPage from "@/app/inventory/stock-transfer/page";
 import NotificationsPage from "@/app/notifications/page";
 import PayrollPage from "@/app/payroll/page";
 import POSPage from "@/app/pos/page";
+import PosOrdersPage from "@/app/pos/orders/page";
+import BarcodePrintPage from "@/app/pos/barcode-print/page";
+import QrCodePrintPage from "@/app/pos/qr-print/page";
 import ProductsPage from "@/app/products/page";
 import PurchasesPage from "@/app/purchases/page";
 import PurchaseReturnsPage from "@/app/purchases/returns/page";
@@ -584,6 +587,30 @@ export default function App() {
             element={
               <PermissionRoute permission="pos.use">
                 <POSPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/pos/orders"
+            element={
+              <PermissionRoute permission="pos.use">
+                <PosOrdersPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/pos/barcode-print"
+            element={
+              <PermissionRoute permission="pos.use">
+                <BarcodePrintPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/pos/qr-print"
+            element={
+              <PermissionRoute permission="pos.use">
+                <QrCodePrintPage />
               </PermissionRoute>
             }
           />

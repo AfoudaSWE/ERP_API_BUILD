@@ -181,6 +181,10 @@ async function createEmployee(
   input: z.infer<typeof employeeSchema>,
 ) {
   await assertAssignable(auth, input.role);
+  const company = (await query<{ email_domain: string | null }>("SELECT email_domain FROM companies WHERE id=$1", [auth.companyId])).rows[0];
+  if (company?.email_domain && !input.email.toLowerCase().endsWith(`@${company.email_domain}`)) {
+    throw new HttpError(422, "INVALID_EMAIL_DOMAIN", `Employee email must end with @${company.email_domain}`);
+  }
   const passwordHash = await bcrypt.hash(input.password, 12);
   return transaction(async (client) => {
     await assertReferences(client, auth.companyId, input);

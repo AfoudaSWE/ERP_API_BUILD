@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import type { FormEvent, ReactNode } from "react";
 import Link from "@/components/router/Link";
+import { useAuth } from "@/lib/auth";
 
 type Option = { id: string; name: string; nameAr?: string; isActive: boolean };
 type ManagerOption = { userId: string; employeeCode: string; name: string; nameAr: string };
@@ -55,6 +56,8 @@ export function EmployeeForm({
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
 }) {
+  const { user } = useAuth();
+  const emailDomain = user?.companyEmailDomain ?? null;
   const editing = !!employee;
   const employeeBranchIds = employee?.branches.map((b) => b.id) ?? [];
   const employeeWorkplaceIds = employee?.workplaces.map((w) => w.id) ?? [];
@@ -99,7 +102,20 @@ export function EmployeeForm({
             <>
               <label className="block text-sm">
                 {ar ? "البريد" : "Email"}
-                <input required className="input mt-1 w-full" name="email" type="email" />
+                <input
+                  required
+                  className="input mt-1 w-full"
+                  name="email"
+                  type="email"
+                  placeholder={emailDomain ? `name@${emailDomain}` : undefined}
+                  pattern={emailDomain ? `[^\\s@]+@${emailDomain.replace(/[.]/g, "\\.")}` : undefined}
+                  title={emailDomain ? (ar ? `يجب أن ينتهي البريد بـ @${emailDomain}` : `Email must end with @${emailDomain}`) : undefined}
+                />
+                {emailDomain && (
+                  <span className="mt-1 block text-xs text-navy-400">
+                    {ar ? `لازم البريد ينتهي بـ @${emailDomain}` : `Must end with @${emailDomain}`}
+                  </span>
+                )}
               </label>
               <label className="block text-sm">
                 {ar ? "كلمة مرور مؤقتة" : "Temporary password"}

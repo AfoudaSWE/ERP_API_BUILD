@@ -86,11 +86,12 @@ async function createCompanyAndOwner(input: { companyName: string; companyNameAr
         [input.companyName, slugify(input.companyName)],
       )
     ).rows[0];
+    const emailDomain = input.email.split('@')[1]?.toLowerCase() ?? null;
     const company = (
       await client.query<{ id: string }>(
-        `INSERT INTO companies(tenant_id,name,name_ar,subscription_status)
-         VALUES($1,$2,$3,'pending_approval')RETURNING id`,
-        [tenant.id, input.companyName, input.companyNameAr],
+        `INSERT INTO companies(tenant_id,name,name_ar,subscription_status,email_domain)
+         VALUES($1,$2,$3,'pending_approval',$4)RETURNING id`,
+        [tenant.id, input.companyName, input.companyNameAr, emailDomain],
       )
     ).rows[0];
     const createdUser = (
@@ -247,15 +248,16 @@ authRouter.post('/logout', async (request, response) => {
 
 authRouter.get('/me', authenticate, async (request, response) => {
   const result = await query(
-    `SELECT u.id, u.tenant_id, u.company_id, u.email, u.name, u.role,
+    `SELECT u.id, u.tenant_id, u.company_id, u.email, u.name, u.role, c.email_domain company_email_domain,
       COALESCE(array_agg(p.permission_code) FILTER (WHERE p.permission_code IS NOT NULL), '{}') permissions
      FROM users u
+     LEFT JOIN companies c ON c.id = u.company_id
      LEFT JOIN LATERAL(
        SELECT permission_code FROM custom_role_permissions WHERE company_id=u.company_id AND role=u.role
        UNION ALL
        SELECT permission_code FROM role_permissions WHERE role=u.role AND NOT EXISTS(SELECT 1 FROM custom_role_permissions crp WHERE crp.company_id=u.company_id AND crp.role=u.role)
      )p ON true
-     WHERE u.id = $1 GROUP BY u.id`,
+     WHERE u.id = $1 GROUP BY u.id, c.email_domain`,
     [request.auth!.userId],
   );
   if (!result.rows[0]) throw new HttpError(404, 'USER_NOT_FOUND', 'User no longer exists');

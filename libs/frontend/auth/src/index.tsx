@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { apiPublicRequest, apiRequest, hasStoredToken, setAccessToken } from '@erp/shared-frontend-data-access';
 
-export interface AuthUser { id: string; tenantId: string; companyId: string; email: string; name: string; role: string; permissions: string[] }
+export interface AuthUser { id: string; tenantId: string; companyId: string; email: string; name: string; role: string; permissions: string[]; companyEmailDomain?: string | null }
 interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;

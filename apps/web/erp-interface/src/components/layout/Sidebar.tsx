@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from '@/components/router/Link';
 import { useLocation } from 'react-router-dom';
 import {
@@ -15,6 +15,10 @@ import { cn } from '@/lib/utils';
 import type { Locale } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
+
+// AppLayout (and this Sidebar) remounts on every route change, since each page wraps itself in
+// <AppLayout>. Without this, the nav's scroll position resets to the top on every navigation.
+let lastSidebarScrollTop = 0;
 
 interface SidebarProps {
   locale: Locale;
@@ -175,6 +179,10 @@ export function Sidebar({
   const showCrmSection = user?.role !== 'super_admin' && visibleCrmItems.length > 0;
   const crmIndex = navItems.findIndex((item) => item.href === '/crm');
 
+  const navRef = useCallback((node: HTMLElement | null) => {
+    if (node) node.scrollTop = lastSidebarScrollTop;
+  }, []);
+
   return (
     <>
       <div
@@ -225,7 +233,11 @@ export function Sidebar({
           </button>
         </div>
 
-        <nav className="sidebar-nav flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <nav
+          ref={navRef}
+          onScroll={(event) => { lastSidebarScrollTop = event.currentTarget.scrollTop; }}
+          className="sidebar-nav flex-1 space-y-1 overflow-y-auto px-3 py-4"
+        >
           {(user?.role === 'super_admin' ? navItems.filter((item) => item.href === '/platform-admin') : navItems).map((item, index) => {
             const isCustomersAnchor = item.href === '/customers' && showInventorySection;
             const isSalesAnchor = item.href === '/sales' && showSalesSection;
@@ -295,7 +307,7 @@ export function Sidebar({
               return (
                 <div key="hrm-section" className="contents">
                   {!isDesktopCollapsed && (
-                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-navy-400 dark:text-navy-500">
+                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-black dark:text-white">
                       {isRTL ? 'الموارد البشرية' : 'HRM'}
                     </p>
                   )}
@@ -338,7 +350,7 @@ export function Sidebar({
               return (
                 <div key="inventory-section" className="contents">
                   {!isDesktopCollapsed && (
-                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-navy-400 dark:text-navy-500">
+                    <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-black dark:text-white">
                       {isRTL ? 'المخزون' : 'Inventory'}
                     </p>
                   )}
@@ -426,7 +438,7 @@ function ExpandableSection({
   return (
     <div className="contents">
       {!isDesktopCollapsed && (
-        <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-navy-400 dark:text-navy-500">
+        <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-black dark:text-white">
           {title}
         </p>
       )}

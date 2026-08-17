@@ -10,8 +10,9 @@ async function fixture(quantity = '5.000'): Promise<Fixture> {
   const tenantId = randomUUID(); const companyId = randomUUID(); const userId = randomUUID();
   const supplierId = randomUUID(); const productId = randomUUID(); const warehouseId = randomUUID();
   const orderId = randomUUID(); const itemId = randomUUID();
-  await pool.query(`INSERT INTO tenants(id,name,slug) VALUES($1,'Receipt Test',$2)`, [tenantId, `receipt-${tenantId}`]);
-  await pool.query(`INSERT INTO companies(id,tenant_id,name) VALUES($1,$2,'Receipt Test')`, [companyId, tenantId]);
+  const companyName = `Receipt Test ${tenantId}`;
+  await pool.query(`INSERT INTO tenants(id,name,slug) VALUES($1,$2,$3)`, [tenantId, companyName, `receipt-${tenantId}`]);
+  await pool.query(`INSERT INTO companies(id,tenant_id,name) VALUES($1,$2,$3)`, [companyId, tenantId, companyName]);
   await pool.query(`INSERT INTO users(id,tenant_id,company_id,email,password_hash,name,role) VALUES($1,$2,$3,$4,'test','Tester','business_owner')`, [userId, tenantId, companyId, `${userId}@test.local`]);
   await pool.query(`INSERT INTO suppliers(id,company_id,code,name) VALUES($1,$2,'SUP','Supplier')`, [supplierId, companyId]);
   await pool.query(`INSERT INTO products(id,company_id,sku,name,cost_price,selling_price,total_stock) VALUES($1,$2,'SKU','Product',10,20,0)`, [productId, companyId]);

@@ -10,13 +10,14 @@ async function fixture(locationRequired = false) {
   const tenantId = randomUUID(),
     companyId = randomUUID(),
     userId = randomUUID();
+  const companyName = `Attendance Test ${tenantId}`;
   await pool.query(
-    `INSERT INTO tenants(id,name,slug)VALUES($1,'Attendance Test',$2)`,
-    [tenantId, `attendance-${tenantId}`],
+    `INSERT INTO tenants(id,name,slug)VALUES($1,$2,$3)`,
+    [tenantId, companyName, `attendance-${tenantId}`],
   );
   await pool.query(
-    `INSERT INTO companies(id,tenant_id,name,attendance_location_required)VALUES($1,$2,'Attendance Test',$3)`,
-    [companyId, tenantId, locationRequired],
+    `INSERT INTO companies(id,tenant_id,name,attendance_location_required)VALUES($1,$2,$3,$4)`,
+    [companyId, tenantId, companyName, locationRequired],
   );
   await pool.query(
     `INSERT INTO users(id,tenant_id,company_id,email,password_hash,name,role)VALUES($1,$2,$3,$4,'test','Attendance Employee','employee')`,

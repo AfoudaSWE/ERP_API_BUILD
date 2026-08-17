@@ -14,13 +14,14 @@ describe("HR employee onboarding", () => {
       branchId = randomUUID(),
       shiftId = randomUUID(),
       workplaceId = randomUUID();
+    const companyName = `HR Test ${tenantId}`;
     await pool.query(
-      "INSERT INTO tenants(id,name,slug)VALUES($1,'HR Test',$2)",
-      [tenantId, `hr-${tenantId}`],
+      "INSERT INTO tenants(id,name,slug)VALUES($1,$2,$3)",
+      [tenantId, companyName, `hr-${tenantId}`],
     );
     await pool.query(
-      "INSERT INTO companies(id,tenant_id,name)VALUES($1,$2,'HR Test')",
-      [companyId, tenantId],
+      "INSERT INTO companies(id,tenant_id,name)VALUES($1,$2,$3)",
+      [companyId, tenantId, companyName],
     );
     await pool.query(
       "INSERT INTO users(id,tenant_id,company_id,email,password_hash,name,role)VALUES($1,$2,$3,$4,'x','Owner','business_owner')",

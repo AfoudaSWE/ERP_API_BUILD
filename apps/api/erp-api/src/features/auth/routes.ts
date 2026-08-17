@@ -10,6 +10,7 @@ import { query, transaction } from '../../db/client.js';
 import { HttpError, validate } from '../../lib/http.js';
 import { serializeRow } from '../../lib/rows.js';
 import { sendMail } from '../../lib/mailer.js';
+import { chartOfAccountsTemplate } from '../../db/seed-accounting.js';
 import { authenticate } from './middleware.js';
 
 type UserRow = { id: string; tenant_id: string; company_id: string; email: string; password_hash: string; name: string; role: string; permissions: string[] };
@@ -105,6 +106,13 @@ async function createCompanyAndOwner(input: { companyName: string; companyNameAr
       `INSERT INTO branches(company_id,code,name,name_ar) VALUES($1,'MAIN','Main Branch',$2)`,
       [company.id, input.companyNameAr ? `${input.companyNameAr} - الفرع الرئيسي` : 'الفرع الرئيسي'],
     );
+    for (const account of chartOfAccountsTemplate) {
+      await client.query(
+        `INSERT INTO ledger_accounts(company_id,code,name,name_ar,account_type,system_role,allow_manual_posting,is_active)
+         VALUES($1,$2,$3,$4,$5,$6,true,true)`,
+        [company.id, ...account],
+      );
+    }
     return createdUser;
   });
   if (env.PLATFORM_APPROVAL_EMAIL) {

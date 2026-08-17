@@ -1,6 +1,6 @@
 import { pool, transaction } from './client.js';
 
-const template = [
+export const chartOfAccountsTemplate = [
   ['1000', 'Cash', 'النقدية', 'asset', 'cash'],
   ['1010', 'Bank', 'البنك', 'asset', 'bank'],
   ['1200', 'Accounts receivable', 'العملاء', 'asset', 'receivable'],
@@ -19,7 +19,7 @@ const template = [
 export async function seedAccounting() {
   await transaction(async (client) => {
     const companies = await client.query<{ id: string }>('SELECT id FROM companies');
-    for (const company of companies.rows) for (const account of template) {
+    for (const company of companies.rows) for (const account of chartOfAccountsTemplate) {
       await client.query(`INSERT INTO ledger_accounts(company_id,code,name,name_ar,account_type,system_role,allow_manual_posting,is_active) VALUES($1,$2,$3,$4,$5,$6,true,true) ON CONFLICT(company_id,code) DO UPDATE SET name=excluded.name,name_ar=excluded.name_ar,account_type=excluded.account_type,system_role=excluded.system_role,allow_manual_posting=true,is_active=true`, [company.id, ...account]);
     }
   });

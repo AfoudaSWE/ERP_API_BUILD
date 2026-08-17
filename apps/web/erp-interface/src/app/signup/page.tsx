@@ -3,6 +3,7 @@ import { Building2, UserPlus } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
 import Link from '@/components/router/Link';
+import { AuthLayout } from '@/components/layout/AuthLayout';
 
 function slugForEmail(value: string) {
   return value
@@ -44,17 +45,17 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-navy-950 p-4">
-      <section className="w-full max-w-md rounded-2xl border border-navy-700 bg-white p-8 shadow-2xl dark:bg-navy-900">
-        <div className="mb-4 flex justify-end">
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => void i18n.changeLanguage(ar ? 'en' : 'ar')}
-          >
-            {ar ? 'English' : 'العربية'}
-          </button>
-        </div>
+    <AuthLayout>
+      <div className="mb-6 flex justify-end">
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() => void i18n.changeLanguage(ar ? 'en' : 'ar')}
+        >
+          {ar ? 'English' : 'العربية'}
+        </button>
+      </div>
+      <div className="card p-8">
         <div className="mb-7 flex items-center gap-3">
           <div className="rounded-xl bg-primary-600 p-3 text-white">
             <Building2 className="h-6 w-6" />
@@ -64,7 +65,7 @@ export default function SignupPage() {
               {ar ? 'إنشاء حساب شركة جديد' : 'Create your company account'}
             </h1>
             <p className="text-sm text-navy-500">
-              {ar ? 'تجربة مجانية، بدون بطاقة ائتمان' : 'Free trial, no credit card required'}
+              {ar ? 'تجربة مجانية 14 يوم، بدون بطاقة ائتمان' : '14-day free trial, no credit card required'}
             </p>
           </div>
         </div>
@@ -74,23 +75,25 @@ export default function SignupPage() {
           </div>
         )}
         <form onSubmit={submit} className="space-y-5">
-          <div>
-            <label className="label" htmlFor="companyName">{ar ? 'اسم الشركة' : 'Company name'}</label>
-            <input
-              id="companyName"
-              name="companyName"
-              type="text"
-              className="input"
-              required
-              minLength={2}
-              maxLength={120}
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="label" htmlFor="companyNameAr">{ar ? 'اسم الشركة بالعربية (اختياري)' : 'Company name in Arabic (optional)'}</label>
-            <input id="companyNameAr" name="companyNameAr" type="text" className="input" maxLength={120} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label className="label" htmlFor="companyName">{ar ? 'اسم الشركة' : 'Company name'}</label>
+              <input
+                id="companyName"
+                name="companyName"
+                type="text"
+                className="input"
+                required
+                minLength={2}
+                maxLength={120}
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="companyNameAr">{ar ? 'اسم الشركة بالعربية' : 'Company name (Arabic)'}</label>
+              <input id="companyNameAr" name="companyNameAr" type="text" className="input" maxLength={120} placeholder={ar ? 'اختياري' : 'Optional'} />
+            </div>
           </div>
           <div>
             <label className="label" htmlFor="name">{ar ? 'اسمك' : 'Your name'}</label>
@@ -128,16 +131,16 @@ export default function SignupPage() {
           </div>
           <button type="submit" disabled={loading} className="btn btn-primary btn-md w-full justify-center">
             <UserPlus className="h-4 w-4" />
-            {loading ? (ar ? 'جارٍ الإنشاء...' : 'Creating...') : (ar ? 'ابدأ التجربة المجانية' : 'Start free trial')}
+            {loading ? (ar ? 'جارٍ الإنشاء…' : 'Creating…') : (ar ? 'ابدأ التجربة المجانية' : 'Start free trial')}
           </button>
         </form>
-        <p className="mt-5 text-center text-sm text-navy-500">
+        <p className="mt-6 text-center text-sm text-navy-500">
           {ar ? 'عندك حساب بالفعل؟' : 'Already have an account?'}{' '}
-          <Link href="/login" className="text-primary-600 hover:underline">
+          <Link href="/login" className="font-medium text-primary-600 hover:underline">
             {ar ? 'تسجيل الدخول' : 'Sign in'}
           </Link>
         </p>
-      </section>
-    </main>
+      </div>
+    </AuthLayout>
   );
 }

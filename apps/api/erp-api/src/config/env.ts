@@ -27,6 +27,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   MAIL_FROM: z.string().optional(),
   PLATFORM_APPROVAL_EMAIL: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
 }).superRefine((value, context) => {
   if (value.NODE_ENV !== 'production') return;
   if (!process.env.DATABASE_URL) context.addIssue({ code: 'custom', path: ['DATABASE_URL'], message: 'Required in production' });

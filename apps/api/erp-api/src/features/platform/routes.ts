@@ -117,8 +117,11 @@ platformRouter.post("/companies/:id/approve", async (req, res) => {
   if (owner) {
     void sendMail({
       to: owner.email,
-      subject: `Your company "${row.name}" has been approved`,
-      html: `<p>Hi ${owner.name},</p><p>Your company <strong>${row.name}</strong> has been approved. You can now sign in and start your free trial.</p>`,
+      subject: `Your free plan is active — ${row.name}`,
+      html: `<p>Hi ${owner.name},</p>
+        <p>Great news — <strong>${row.name}</strong> has been approved and your free plan is now active on ClubGenies ERP.</p>
+        <p>You can sign in right away and start setting things up.</p>
+        <p>— The ClubGenies team</p>`,
     });
   }
   res.json({ data: row });

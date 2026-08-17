@@ -71,6 +71,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.2",
+    "google-auth-library": "^11.0.2",
     "helmet": "^8.3.0",
     "i18next": "^26.3.6",
     "intro.js": "^8.5.0",

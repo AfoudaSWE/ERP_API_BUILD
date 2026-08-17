@@ -1,33 +1,26 @@
 import { useState, type FormEvent } from 'react';
-import { MailCheck, UserPlus } from 'lucide-react';
+import { Building2, Lock, Mail, MailCheck, Sparkles, User, UserPlus } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
 import Link from '@/components/router/Link';
 import { AuthLayout } from '@/components/layout/AuthLayout';
-
-function slugForEmail(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[^a-z0-9]/g, '');
-}
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 function looksLikeEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { signup, loginWithGoogle } = useAuth();
   const { i18n } = useTranslation();
   const ar = i18n.language.startsWith('ar');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [pendingApproval, setPendingApproval] = useState(false);
   const [companyName, setCompanyName] = useState('');
+  const [companyNameAr, setCompanyNameAr] = useState('');
   const [name, setName] = useState('');
-  const domain = slugForEmail(companyName);
-  const email = domain ? `admin@${domain}.com` : '';
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,13 +51,29 @@ export default function SignupPage() {
     }
   }
 
+  async function submitWithGoogle(idToken: string) {
+    setGoogleLoading(true);
+    setError(null);
+    try {
+      const result = await loginWithGoogle({ idToken, companyName: companyName.trim(), companyNameAr: companyNameAr.trim() });
+      if (result.pendingApproval) setPendingApproval(true);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : (ar ? 'تعذّر إنشاء الحساب' : 'Unable to create account'));
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
+
   if (pendingApproval) {
     return (
       <AuthLayout
+        eyebrow={<><Sparkles className="h-3.5 w-3.5" />{ar ? 'تم إنشاء الحساب' : 'Account created'}</>}
         headline={ar ? <>شبه خلصنا.<br />في انتظار الاعتماد.</> : <>Almost there.<br />Awaiting approval.</>}
       >
         <div className="flex flex-col items-center gap-4 py-6 text-center">
-          <MailCheck className="h-12 w-12 text-primary-600" />
+          <div className="animate-auth-pop flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50 text-primary-600">
+            <MailCheck className="h-8 w-8" />
+          </div>
           <p className="text-navy-700">
             {ar
               ? 'تم إنشاء حسابك بنجاح. طلبك الآن قيد المراجعة من فريقنا، وهنبعتلك إشعار بمجرد الاعتماد عشان تقدر تسجل الدخول.'
@@ -80,87 +89,136 @@ export default function SignupPage() {
 
   return (
     <AuthLayout
+      eyebrow={<><Sparkles className="h-3.5 w-3.5" />{ar ? 'تجربة مجانية ١٤ يوم' : '14-day free trial'}</>}
       headline={ar ? <>شركتك.<br />جاهزة تشتغل.</> : <>Your company.<br />Ready to ship.</>}
     >
       {error && (
-        <div role="alert" className="mb-6 rounded-lg border border-danger-500/30 bg-danger-500/10 p-3 text-sm text-danger-400">
+        <div role="alert" className="animate-auth-rise mb-6 rounded-lg border border-danger-500/30 bg-danger-500/10 p-3 text-sm text-danger-600">
           {error}
         </div>
       )}
       <form onSubmit={submit} className="space-y-5">
         <div className="grid gap-5 sm:grid-cols-2">
-          <div>
+          <div className="animate-auth-rise" style={{ animationDelay: '40ms' }}>
             <label htmlFor="companyName" className="label text-navy-700">
               {ar ? 'اسم الشركة' : 'Company name'}
             </label>
+            <div className="relative">
+              <Building2 className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-400" />
+              <input
+                id="companyName"
+                name="companyName"
+                type="text"
+                className="input ps-9 transition-all duration-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/15"
+                required
+                minLength={2}
+                maxLength={120}
+                pattern="[^@]+"
+                title={ar ? 'أدخل اسم شركة، وليس بريدًا إلكترونيًا' : 'Enter a company name, not an email address'}
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="animate-auth-rise" style={{ animationDelay: '80ms' }}>
+            <label htmlFor="companyNameAr" className="label text-navy-700">
+              {ar ? 'بالعربية' : 'Arabic name'}
+            </label>
             <input
-              id="companyName"
-              name="companyName"
+              id="companyNameAr"
+              name="companyNameAr"
               type="text"
-              className="input"
+              className="input transition-all duration-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/15"
+              maxLength={120}
+              pattern="[^@]*"
+              title={ar ? 'أدخل اسم شركة، وليس بريدًا إلكترونيًا' : 'Enter a company name, not an email address'}
+              placeholder={ar ? 'اختياري' : 'Optional'}
+              value={companyNameAr}
+              onChange={(e) => setCompanyNameAr(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="animate-auth-rise" style={{ animationDelay: '120ms' }}>
+          <label htmlFor="name" className="label text-navy-700">
+            {ar ? 'اسمك' : 'Your name'}
+          </label>
+          <div className="relative">
+            <User className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-400" />
+            <input
+              id="name"
+              name="name"
+              type="text"
+              className="input ps-9 transition-all duration-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/15"
               required
               minLength={2}
               maxLength={120}
               pattern="[^@]+"
-              title={ar ? 'أدخل اسم شركة، وليس بريدًا إلكترونيًا' : 'Enter a company name, not an email address'}
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              title={ar ? 'أدخل اسمك، وليس بريدًا إلكترونيًا' : 'Enter your name, not an email address'}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div>
-            <label htmlFor="companyNameAr" className="label text-navy-700">
-              {ar ? 'بالعربية' : 'Arabic name'}
-            </label>
-            <input id="companyNameAr" name="companyNameAr" type="text" className="input" maxLength={120} pattern="[^@]*" title={ar ? 'أدخل اسم شركة، وليس بريدًا إلكترونيًا' : 'Enter a company name, not an email address'} placeholder={ar ? 'اختياري' : 'Optional'} />
-          </div>
         </div>
-        <div>
-          <label htmlFor="name" className="label text-navy-700">
-            {ar ? 'اسمك' : 'Your name'}
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            className="input"
-            required
-            minLength={2}
-            maxLength={120}
-            pattern="[^@]+"
-            title={ar ? 'أدخل اسمك، وليس بريدًا إلكترونيًا' : 'Enter your name, not an email address'}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <div>
+        <div className="animate-auth-rise" style={{ animationDelay: '160ms' }}>
           <label htmlFor="email" className="label text-navy-700">
             {ar ? 'البريد الإلكتروني' : 'Email'}
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            className="input opacity-70"
-            required
-            readOnly
-            value={email}
-            placeholder={ar ? 'اكتب اسم الشركة أولاً' : 'Type the company name first'}
-          />
-          <p className="mt-2 text-xs text-navy-500">
-            {ar ? 'ثابت حسب اسم الشركة' : 'Fixed to the company name'}
-          </p>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-400" />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className="input ps-9 transition-all duration-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/15"
+              required
+              autoComplete="email"
+              placeholder="you@company.com"
+            />
+          </div>
         </div>
-        <div>
+        <div className="animate-auth-rise" style={{ animationDelay: '200ms' }}>
           <label htmlFor="password" className="label text-navy-700">
             {ar ? 'كلمة المرور' : 'Password'}
           </label>
-          <input id="password" name="password" type="password" className="input" required minLength={8} autoComplete="new-password" />
+          <div className="relative">
+            <Lock className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-400" />
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className="input ps-9 transition-all duration-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/15"
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </div>
         </div>
-        <button type="submit" disabled={loading} className="btn btn-primary btn-md w-full justify-center">
-          <UserPlus className="h-4 w-4" />
+        <button
+          type="submit"
+          disabled={loading}
+          className="animate-auth-rise group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-primary-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary-600/30 active:translate-y-0 disabled:pointer-events-none disabled:opacity-60"
+          style={{ animationDelay: '240ms' }}
+        >
+          <UserPlus className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
           {loading ? (ar ? 'جارٍ الإنشاء…' : 'Creating…') : (ar ? 'ابدأ التجربة المجانية' : 'Start free trial')}
         </button>
       </form>
+
+      <div className="animate-auth-rise my-6 flex items-center gap-3" style={{ animationDelay: '280ms' }}>
+        <div className="h-px flex-1 bg-navy-200" />
+        <span className="text-xs font-medium text-navy-400">{ar ? 'أو' : 'or'}</span>
+        <div className="h-px flex-1 bg-navy-200" />
+      </div>
+
+      <div className="animate-auth-rise flex justify-center" style={{ animationDelay: '300ms' }}>
+        <GoogleSignInButton
+          ar={ar}
+          onCredential={(idToken) => void submitWithGoogle(idToken)}
+          disabled={!companyName.trim() || googleLoading}
+          disabledHint={!companyName.trim() ? (ar ? 'اكتب اسم الشركة أولًا' : 'Type your company name first') : undefined}
+        />
+      </div>
+
       <div className="my-6 border-t border-dashed border-navy-200" />
       <p className="text-sm text-navy-500">
         {ar ? 'عندك حساب بالفعل؟' : 'Already have an account?'}{' '}

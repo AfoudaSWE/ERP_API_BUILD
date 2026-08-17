@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { z } from 'zod';
+import { OAuth2Client } from 'google-auth-library';
 import { loginSchema, signupSchema } from '@erp/contracts';
 import { env } from '../../config/env.js';
 import { query, transaction } from '../../db/client.js';
@@ -66,8 +67,7 @@ function slugify(name: string) {
   return `${base}-${crypto.randomBytes(3).toString('hex')}`;
 }
 
-authRouter.post('/signup', async (request, response) => {
-  const input = validate(signupSchema, request.body);
+async function createCompanyAndOwner(input: { companyName: string; companyNameAr: string; name: string; email: string; passwordHash: string }) {
   const existing = await query('SELECT 1 FROM users WHERE lower(email)=lower($1)', [input.email]);
   if (existing.rowCount) {
     throw new HttpError(409, 'EMAIL_IN_USE', 'This email is already registered');
@@ -79,7 +79,6 @@ authRouter.post('/signup', async (request, response) => {
   if (existingCompany.rowCount) {
     throw new HttpError(409, 'COMPANY_NAME_IN_USE', 'This company name is already registered');
   }
-  const passwordHash = await bcrypt.hash(input.password, 12);
   const user = await transaction(async (client) => {
     const tenant = (
       await client.query<{ id: string }>(
@@ -98,7 +97,7 @@ authRouter.post('/signup', async (request, response) => {
       await client.query<{ id: string; tenant_id: string; company_id: string; email: string; name: string; role: string }>(
         `INSERT INTO users(tenant_id,company_id,email,password_hash,name,role)
          VALUES($1,$2,lower($3),$4,$5,'company_owner')RETURNING id,tenant_id,company_id,email,name,role`,
-        [tenant.id, company.id, input.email, passwordHash, input.name],
+        [tenant.id, company.id, input.email, input.passwordHash, input.name],
       )
     ).rows[0];
     await client.query(
@@ -107,6 +106,23 @@ authRouter.post('/signup', async (request, response) => {
     );
     return createdUser;
   });
+  if (env.PLATFORM_APPROVAL_EMAIL) {
+    void sendMail({
+      to: env.PLATFORM_APPROVAL_EMAIL,
+      subject: `New subscriber: ${input.companyName}`,
+      html: `<p>A new subscriber signed up on ClubGenies ERP and is waiting for approval.</p>
+        <ul>
+          <li><strong>Company:</strong> ${input.companyName}${input.companyNameAr ? ` (${input.companyNameAr})` : ''}</li>
+          <li><strong>Owner:</strong> ${input.name}</li>
+          <li><strong>Email:</strong> ${input.email}</li>
+        </ul>
+        <p>Open the platform admin panel to approve or reject this company.</p>`,
+    });
+  }
+  return user;
+}
+
+async function issueSession(user: { id: string; tenant_id: string; company_id: string; email: string; name: string; role: string }) {
   const permissions = (
     await query<{ permission_code: string }>('SELECT permission_code FROM role_permissions WHERE role=$1', [user.role])
   ).rows.map((row) => row.permission_code);
@@ -119,20 +135,76 @@ authRouter.post('/signup', async (request, response) => {
     [user.id, user.tenant_id, tokenHash(refreshToken), env.REFRESH_TOKEN_DAYS],
   );
   const safeUser = { id: user.id, tenant_id: user.tenant_id, company_id: user.company_id, email: user.email, name: user.name, role: user.role, permissions };
-  if (env.PLATFORM_APPROVAL_EMAIL) {
-    void sendMail({
-      to: env.PLATFORM_APPROVAL_EMAIL,
-      subject: `New company awaiting approval: ${input.companyName}`,
-      html: `<p>A new company signed up and is waiting for approval.</p>
-        <ul>
-          <li><strong>Company:</strong> ${input.companyName}${input.companyNameAr ? ` (${input.companyNameAr})` : ''}</li>
-          <li><strong>Owner:</strong> ${input.name}</li>
-          <li><strong>Email:</strong> ${input.email}</li>
-        </ul>
-        <p>Open the platform admin panel to approve or reject this company.</p>`,
-    });
+  return { accessToken, refreshToken, user: serializeRow(safeUser) };
+}
+
+authRouter.post('/signup', async (request, response) => {
+  const input = validate(signupSchema, request.body);
+  const passwordHash = await bcrypt.hash(input.password, 12);
+  const user = await createCompanyAndOwner({ companyName: input.companyName, companyNameAr: input.companyNameAr, name: input.name, email: input.email, passwordHash });
+  const session = await issueSession(user);
+  response.status(201).json({ data: { ...session, pendingApproval: true } });
+});
+
+let googleClient: OAuth2Client | null = null;
+function getGoogleClient() {
+  if (!env.GOOGLE_CLIENT_ID) return null;
+  if (!googleClient) googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+  return googleClient;
+}
+
+const googleAuthSchema = z.object({
+  idToken: z.string().min(20),
+  companyName: z.string().trim().min(2).max(120).optional(),
+  companyNameAr: z.string().trim().max(120).default(''),
+});
+
+authRouter.post('/google', async (request, response) => {
+  const client = getGoogleClient();
+  if (!client) throw new HttpError(503, 'GOOGLE_SIGNIN_UNAVAILABLE', 'Sign in with Google is not configured');
+  const input = validate(googleAuthSchema, request.body);
+  let payload;
+  try {
+    const ticket = await client.verifyIdToken({ idToken: input.idToken, audience: env.GOOGLE_CLIENT_ID });
+    payload = ticket.getPayload();
+  } catch {
+    throw new HttpError(401, 'INVALID_GOOGLE_TOKEN', 'Could not verify the Google sign-in token');
   }
-  response.status(201).json({ data: { accessToken, refreshToken, user: serializeRow(safeUser), pendingApproval: true } });
+  if (!payload?.email || !payload.email_verified) {
+    throw new HttpError(400, 'GOOGLE_EMAIL_UNVERIFIED', 'Your Google account email is not verified');
+  }
+  const email = payload.email;
+  const name = payload.name || email.split('@')[0];
+
+  const existingResult = await query<UserRow>(
+    `SELECT u.id, u.tenant_id, u.company_id, u.email, u.password_hash, u.name, u.role,
+      COALESCE(array_agg(rp.permission_code) FILTER (WHERE rp.permission_code IS NOT NULL), '{}') permissions
+     FROM users u LEFT JOIN role_permissions rp ON rp.role = u.role
+     WHERE lower(u.email) = lower($1) AND u.is_active = true
+     GROUP BY u.id`,
+    [email],
+  );
+  const existingUser = existingResult.rows[0];
+
+  if (existingUser) {
+    if (existingUser.role !== 'super_admin') {
+      const company = (await query<{ subscription_status: string }>('SELECT subscription_status FROM companies WHERE id=$1', [existingUser.company_id])).rows[0];
+      if (company?.subscription_status === 'pending_approval') {
+        throw new HttpError(402, 'PENDING_APPROVAL', 'This company is awaiting approval before it can be used');
+      }
+    }
+    const session = await issueSession(existingUser);
+    response.json({ data: session });
+    return;
+  }
+
+  if (!input.companyName) {
+    throw new HttpError(400, 'COMPANY_NAME_REQUIRED', 'A company name is required to create a new account');
+  }
+  const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
+  const user = await createCompanyAndOwner({ companyName: input.companyName, companyNameAr: input.companyNameAr, name, email, passwordHash });
+  const session = await issueSession(user);
+  response.status(201).json({ data: { ...session, pendingApproval: true } });
 });
 
 authRouter.post('/refresh', async (request, response) => {

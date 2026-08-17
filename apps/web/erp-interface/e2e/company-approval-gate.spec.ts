@@ -4,6 +4,7 @@ test('signup shows a pending-approval screen instead of the dashboard', async ({
   await page.goto('/signup');
   await page.getByLabel(/Company name|اسم الشركة/i).fill(`Playwright Approval Co ${Date.now()}`);
   await page.getByLabel(/^Your name$|^اسمك$/i).fill('Playwright Owner');
+  await page.getByLabel(/^Email$|^البريد الإلكتروني$/i).fill(`playwright.approval.${Date.now()}@example.com`);
   await page.getByLabel(/^Password$|^كلمة المرور$/i).fill('Test1234!');
   await page.getByRole('button', { name: /Start free trial|ابدأ التجربة المجانية/i }).click();
   await expect(page.getByText(/awaiting approval|قيد المراجعة/i)).toBeVisible({ timeout: 10000 });

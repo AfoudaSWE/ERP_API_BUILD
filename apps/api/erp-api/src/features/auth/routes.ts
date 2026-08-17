@@ -10,7 +10,7 @@ import { query, transaction } from '../../db/client.js';
 import { HttpError, validate } from '../../lib/http.js';
 import { serializeRow } from '../../lib/rows.js';
 import { sendMail } from '../../lib/mailer.js';
-import { chartOfAccountsTemplate } from '../../db/seed-accounting.js';
+import { chartOfAccountsTemplate } from '../../db/chart-of-accounts.js';
 import { authenticate } from './middleware.js';
 
 type UserRow = { id: string; tenant_id: string; company_id: string; email: string; password_hash: string; name: string; role: string; permissions: string[] };

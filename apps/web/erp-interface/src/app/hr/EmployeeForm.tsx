@@ -3,6 +3,7 @@ import type { FormEvent, ReactNode } from "react";
 
 type Option = { id: string; name: string; nameAr?: string; isActive: boolean };
 type ManagerOption = { userId: string; employeeCode: string; name: string; nameAr: string };
+type RoleOption = { role: string; name?: string; nameAr?: string };
 export type Employee = {
   userId: string;
   employeeCode: string;
@@ -37,6 +38,7 @@ export function EmployeeForm({
   branches,
   workplaces,
   managers,
+  roles,
   onSubmit,
   onCancel,
 }: {
@@ -48,6 +50,7 @@ export function EmployeeForm({
   branches: Option[];
   workplaces: Option[];
   managers: ManagerOption[];
+  roles: RoleOption[];
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
 }) {
@@ -101,6 +104,18 @@ export function EmployeeForm({
                 {ar ? "كلمة مرور مؤقتة" : "Temporary password"}
                 <input required className="input mt-1 w-full" name="password" type="password" />
               </label>
+              {roles.length > 0 && (
+                <label className="block text-sm">
+                  {ar ? "الدور / الصلاحية" : "Role / permission"}
+                  <select className="select mt-1 w-full" name="role" defaultValue="employee">
+                    {roles.map((r) => (
+                      <option key={r.role} value={r.role}>
+                        {ar ? r.nameAr || r.name || r.role : r.name || r.role}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
             </>
           )}
           <label className="block text-sm">

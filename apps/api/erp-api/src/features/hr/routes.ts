@@ -7,6 +7,7 @@ import { serializeRow, serializeRows } from "../../lib/rows.js";
 import { authorizeAny } from "../auth/middleware.js";
 import { appendAuditEvent } from "../audit/routes.js";
 import { createCrudRouter } from "../shared/crud-router.js";
+import { assertAssignable } from "../auth/roles-routes.js";
 
 export const hrRouter = Router();
 
@@ -66,6 +67,7 @@ const employeeSchema = z.object({
   shiftId: z.uuid().nullable().optional(),
   workplaceIds: z.array(z.uuid()).max(20).default([]),
   managerId: z.uuid().nullable().optional(),
+  role: z.string().trim().min(2).max(50).default("employee"),
 });
 
 async function assertReferences(
@@ -175,16 +177,17 @@ hrRouter.get(
 );
 
 async function createEmployee(
-  auth: { tenantId: string; companyId: string; userId: string },
+  auth: Express.Request['auth'] & {},
   input: z.infer<typeof employeeSchema>,
 ) {
+  await assertAssignable(auth, input.role);
   const passwordHash = await bcrypt.hash(input.password, 12);
   return transaction(async (client) => {
     await assertReferences(client, auth.companyId, input);
     const user = (
       await client.query(
-        `INSERT INTO users(tenant_id,company_id,email,password_hash,name,role)VALUES($1,$2,lower($3),$4,$5,'employee')RETURNING id,email,name,role,is_active`,
-        [auth.tenantId, auth.companyId, input.email, passwordHash, input.name],
+        `INSERT INTO users(tenant_id,company_id,email,password_hash,name,role)VALUES($1,$2,lower($3),$4,$5,$6)RETURNING id,email,name,role,is_active`,
+        [auth.tenantId, auth.companyId, input.email, passwordHash, input.name, input.role],
       )
     ).rows[0];
     const profile = (
@@ -242,10 +245,7 @@ hrRouter.post(
   authorizeAny("hr.employees.manage", "hr.write"),
   async (req, res) => {
     const input = validate(employeeSchema, req.body);
-    const row = await createEmployee(
-      { tenantId: req.auth!.tenantId, companyId: req.auth!.companyId, userId: req.auth!.userId },
-      input,
-    );
+    const row = await createEmployee(req.auth!, input);
     res.status(201).json({ data: serializeRow(row) });
   },
 );
@@ -258,7 +258,7 @@ hrRouter.post(
       z.object({ employees: z.array(z.record(z.string(), z.unknown())).min(1).max(500) }),
       req.body,
     ).employees;
-    const auth = { tenantId: req.auth!.tenantId, companyId: req.auth!.companyId, userId: req.auth!.userId };
+    const auth = req.auth!;
     const created: unknown[] = [];
     const errors: { index: number; employeeCode?: string; error: string }[] = [];
     for (let index = 0; index < rows.length; index += 1) {
@@ -370,7 +370,7 @@ hrRouter.patch(
   async (req, res) => {
     const input = validate(
       employeeSchema
-        .omit({ password: true, email: true })
+        .omit({ password: true, email: true, role: true })
         .partial()
         .extend({
           isActive: z.boolean().optional(),

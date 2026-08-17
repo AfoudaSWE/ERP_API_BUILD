@@ -32,9 +32,10 @@ type Bootstrap = {
   shifts: Option[];
   workplaces: Option[];
 };
+type RoleOption = { role: string; name?: string; nameAr?: string; accessRank?: number; permissions: string[] };
 
 export default function HRPage() {
-  const { can } = useAuth();
+  const { can, user } = useAuth();
   const { i18n } = useTranslation();
   const ar = i18n.language.startsWith("ar");
   const manage = can("hr.employees.manage") || can("hr.write");
@@ -45,6 +46,7 @@ export default function HRPage() {
       shifts: [],
       workplaces: [],
     }),
+    [roles, setRoles] = useState<RoleOption[]>([]),
     [tab, setTab] = useState<"employees" | "departments" | "shifts" | "branches">("employees"),
     [editing, setEditing] = useState<Employee | null | undefined>(undefined),
     [busy, setBusy] = useState(false),
@@ -59,14 +61,23 @@ export default function HRPage() {
       ]);
       setEmployees(e);
       setOptions(b);
+      if (can("roles.read")) {
+        try { setRoles(await apiRequest<RoleOption[]>("/roles")); } catch { /* role assignment stays optional */ }
+      }
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Failed");
     }
-  }, []);
+  }, [can]);
   useEffect(() => {
     const id = setTimeout(() => void load(), 0);
     return () => clearTimeout(id);
   }, [load]);
+
+  const actorRank = roles.find((role) => role.role === user?.role)?.accessRank ?? 100;
+  const assignableRoles = useMemo(
+    () => roles.filter((role) => user?.role === "super_admin" || (role.accessRank !== undefined ? role.accessRank >= actorRank : role.permissions.every((permission) => user?.permissions.includes(permission)))),
+    [roles, user, actorRank],
+  );
 
   const filteredEmployees = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -136,6 +147,7 @@ export default function HRPage() {
             shiftId: f.get("shiftId") || null,
             workplaceIds: f.getAll("workplaceIds"),
             managerId: f.get("managerId") || null,
+            role: f.get("role") || "employee",
           }),
         });
         setMessage(ar ? "تم إنشاء الموظف وربطه بنجاح." : "Employee onboarded successfully.");
@@ -329,6 +341,7 @@ export default function HRPage() {
               name: x.name,
               nameAr: x.nameAr,
             }))}
+            roles={assignableRoles}
             onSubmit={(e) => void submitEmployee(e)}
             onCancel={() => setEditing(undefined)}
           />

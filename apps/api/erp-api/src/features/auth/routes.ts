@@ -152,8 +152,14 @@ authRouter.post('/logout', async (request, response) => {
 authRouter.get('/me', authenticate, async (request, response) => {
   const result = await query(
     `SELECT u.id, u.tenant_id, u.company_id, u.email, u.name, u.role,
-      COALESCE(array_agg(rp.permission_code) FILTER (WHERE rp.permission_code IS NOT NULL), '{}') permissions
-     FROM users u LEFT JOIN role_permissions rp ON rp.role = u.role WHERE u.id = $1 GROUP BY u.id`,
+      COALESCE(array_agg(p.permission_code) FILTER (WHERE p.permission_code IS NOT NULL), '{}') permissions
+     FROM users u
+     LEFT JOIN LATERAL(
+       SELECT permission_code FROM custom_role_permissions WHERE company_id=u.company_id AND role=u.role
+       UNION ALL
+       SELECT permission_code FROM role_permissions WHERE role=u.role AND NOT EXISTS(SELECT 1 FROM custom_role_permissions crp WHERE crp.company_id=u.company_id AND crp.role=u.role)
+     )p ON true
+     WHERE u.id = $1 GROUP BY u.id`,
     [request.auth!.userId],
   );
   if (!result.rows[0]) throw new HttpError(404, 'USER_NOT_FOUND', 'User no longer exists');

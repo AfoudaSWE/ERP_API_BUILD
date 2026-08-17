@@ -11,6 +11,12 @@ export const purchaseOrderInputSchema = z.object({
 export const purchaseActionSchema = z.object({ action: z.enum(['submit', 'approve', 'reject', 'cancel', 'close']), reason: z.string().max(500).optional() });
 export const goodsReceiptInputSchema = z.object({ receiptDate: isoDateSchema, supplierReference: z.string().max(100).optional(), items: z.array(z.object({ purchaseOrderItemId: uuidSchema, acceptedQuantity: quantitySchema })).min(1) }).refine((value) => new Set(value.items.map((item) => item.purchaseOrderItemId)).size === value.items.length, { message: 'Receipt items must be unique', path: ['items'] });
 
+export const purchaseReturnInputSchema = z.object({
+  supplierId: uuidSchema, warehouseId: uuidSchema, businessDate: isoDateSchema, reason: z.string().min(3).max(500),
+  items: z.array(z.object({ productId: uuidSchema, quantity: quantitySchema, unitCost: moneySchema, taxRate: taxRateSchema.default('0') })).min(1),
+});
+
 export type WarehouseInput = z.infer<typeof warehouseInputSchema>;
 export type PurchaseOrderInput = z.infer<typeof purchaseOrderInputSchema>;
 export type GoodsReceiptInput = z.infer<typeof goodsReceiptInputSchema>;
+export type PurchaseReturnInput = z.infer<typeof purchaseReturnInputSchema>;

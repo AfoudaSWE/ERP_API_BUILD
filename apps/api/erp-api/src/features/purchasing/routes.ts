@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import { goodsReceiptInputSchema, inventoryAdjustmentSchema, purchaseActionSchema, purchaseOrderInputSchema, stockTransferInputSchema, uuidSchema, warehouseInputSchema } from '@erp/contracts';
+import { goodsReceiptInputSchema, inventoryAdjustmentSchema, purchaseActionSchema, purchaseOrderInputSchema, purchaseReturnInputSchema, stockTransferInputSchema, uuidSchema, warehouseInputSchema } from '@erp/contracts';
 import { query, transaction } from '../../db/client.js';
 import { HttpError, validate } from '../../lib/http.js';
 import { serializeDecimalRow, serializeDecimalRows } from '../../lib/rows.js';
 import { authorize, authorizeAny } from '../auth/middleware.js';
 import { createPurchaseOrder, transitionPurchaseOrder } from './service.js';
 import { postGoodsReceipt } from './receipt-service.js';
+import { postPurchaseReturn } from './return-service.js';
 import { beginIdempotent, completeIdempotent } from '../../lib/idempotency.js';
 import { requireDocumentWarehouseAccess, requireWarehouseAccess, warehouseScopeSql } from '../auth/data-scope.js';
 import { postStockAdjustment } from '../inventory/adjustment-service.js';
@@ -109,5 +110,26 @@ purchasingRouter.post('/inventory/transfers', authorize('inventory.transfer'), a
   await requireWarehouseAccess({query},request.auth!,input.fromWarehouseId);
   await requireWarehouseAccess({query},request.auth!,input.toWarehouseId);
   const result = await transaction((client) => postStockTransfer(client, request.auth!, key, input));
+  response.status(result.kind === 'replay' ? result.statusCode : 201).json(result.body);
+});
+purchasingRouter.get('/purchase-returns', authorizeAny('purchases.view', 'purchases.read'), async (request, response) => {
+  const values: unknown[] = [request.auth!.companyId]; const scope = warehouseScopeSql(request.auth!, 'r.warehouse_id', values);
+  const result = await query(`SELECT r.*,s.name supplier_name,w.name warehouse_name FROM purchase_returns r JOIN suppliers s ON s.id=r.supplier_id JOIN warehouses w ON w.id=r.warehouse_id WHERE r.company_id=$1${scope} ORDER BY r.business_date DESC,r.created_at DESC LIMIT 100`, values);
+  response.json({ data: serializeDecimalRows(result.rows) });
+});
+purchasingRouter.get('/purchase-returns/:id', authorizeAny('purchases.view', 'purchases.read'), async (request, response) => {
+  const id = validate(uuidSchema, request.params.id);
+  await requireDocumentWarehouseAccess({query},request.auth!,'purchase_returns',id);
+  const purchaseReturn = await query('SELECT * FROM purchase_returns WHERE id=$1 AND company_id=$2', [id, request.auth!.companyId]);
+  if (!purchaseReturn.rows[0]) throw new HttpError(404, 'PURCHASE_RETURN_NOT_FOUND', 'Purchase return not found');
+  const items = await query('SELECT * FROM purchase_return_items WHERE purchase_return_id=$1 ORDER BY created_at', [id]);
+  response.json({ data: { ...serializeDecimalRow(purchaseReturn.rows[0]), items: serializeDecimalRows(items.rows) } });
+});
+purchasingRouter.post('/purchase-returns', authorizeAny('purchases.create', 'purchases.write'), async (request, response) => {
+  const key = request.header('Idempotency-Key');
+  if (!key) throw new HttpError(400, 'IDEMPOTENCY_KEY_REQUIRED', 'Idempotency-Key header is required');
+  const input = validate(purchaseReturnInputSchema, request.body);
+  await requireWarehouseAccess({query},request.auth!,input.warehouseId);
+  const result = await transaction((client) => postPurchaseReturn(client, request.auth!, key, input));
   response.status(result.kind === 'replay' ? result.statusCode : 201).json(result.body);
 });

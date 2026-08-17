@@ -39,7 +39,7 @@ export async function requireWarehouseAccess(executor: Executor, auth: AuthScope
   if (!result.rows[0]) throw new HttpError(403, 'BRANCH_SCOPE_FORBIDDEN', 'The warehouse is outside your assigned branches');
 }
 
-export async function requireDocumentWarehouseAccess(executor: Executor, auth: AuthScope, table: 'sales_invoices' | 'purchase_orders', id: string) {
+export async function requireDocumentWarehouseAccess(executor: Executor, auth: AuthScope, table: 'sales_invoices' | 'purchase_orders' | 'purchase_returns' | 'delivery_notes', id: string) {
   if (auth.branchIds === null || auth.branchIds === undefined) return;
   const result = await executor.query<{ warehouse_id: string | null }>(`SELECT warehouse_id FROM ${table} WHERE id=$1 AND company_id=$2`, [id, auth.companyId]);
   if (!result.rows[0]?.warehouse_id) throw new HttpError(403, 'BRANCH_SCOPE_FORBIDDEN', 'The document is outside your assigned branches');

@@ -23,9 +23,16 @@ import PayrollPage from "@/app/payroll/page";
 import POSPage from "@/app/pos/page";
 import ProductsPage from "@/app/products/page";
 import PurchasesPage from "@/app/purchases/page";
+import PurchaseReturnsPage from "@/app/purchases/returns/page";
 import ReportsPage from "@/app/reports/page";
 import SalesPage from "@/app/sales/page";
 import NewSalesInvoicePage from "@/app/sales/new-page";
+import SalesQuotesPage from "@/app/sales/quotes/page";
+import RecurringInvoicesPage from "@/app/sales/recurring/page";
+import InvoiceTemplatesPage from "@/app/sales/templates/page";
+import DeliveryNotesPage from "@/app/sales/delivery-notes/page";
+import SalesReturnsPage from "@/app/sales/returns/page";
+import CashSalesPage from "@/app/sales/cash-sales/page";
 import SettingsPage from "@/app/settings/page";
 import SuppliersPage from "@/app/suppliers/page";
 import UnitsPage from "@/app/units/page";
@@ -443,6 +450,14 @@ export default function App() {
             }
           />
           <Route
+            path="/purchases/returns"
+            element={
+              <PermissionRoute permission="purchases.read">
+                <PurchaseReturnsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
             path="/purchases/*"
             element={
               <PermissionRoute permission="purchases.read">
@@ -483,6 +498,54 @@ export default function App() {
             element={
               <PermissionRoute permission="sales.write">
                 <NewSalesInvoicePage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/sales/quotes"
+            element={
+              <PermissionRoute permission="sales.read">
+                <SalesQuotesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/sales/recurring"
+            element={
+              <PermissionRoute permission="sales.read">
+                <RecurringInvoicesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/sales/templates"
+            element={
+              <PermissionRoute permission="sales.read">
+                <InvoiceTemplatesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/sales/delivery-notes"
+            element={
+              <PermissionRoute permission="sales.read">
+                <DeliveryNotesPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/sales/returns"
+            element={
+              <PermissionRoute permission="sales.read">
+                <SalesReturnsPage />
+              </PermissionRoute>
+            }
+          />
+          <Route
+            path="/sales/cash-sales"
+            element={
+              <PermissionRoute permission="sales.read">
+                <CashSalesPage />
               </PermissionRoute>
             }
           />

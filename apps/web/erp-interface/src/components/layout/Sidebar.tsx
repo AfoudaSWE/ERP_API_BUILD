@@ -6,7 +6,8 @@ import {
   Users, Truck, Calculator, Receipt, Wallet, UserCog, Clock, Banknote,
   BarChart3, Settings, ChevronLeft, ChevronRight, ChevronDown, Sparkles, Menu, X,
   Boxes, Building, UserPlus, ShieldAlert, Tag, Award, Ruler, Warehouse,
-  ClipboardList, ClipboardEdit, ArrowRightLeft,
+  ClipboardList, ClipboardEdit, ArrowRightLeft, FileText, Repeat, FileStack,
+  Undo2, FileSpreadsheet, CircleDollarSign, Truck as TruckIcon, PackageMinus, LineChart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Locale } from '@/lib/i18n';
@@ -69,6 +70,27 @@ const stockGroupItems: NavItem[] = [
   { href: '/inventory/stock-transfer', icon: <ArrowRightLeft className="h-4 w-4" />, labelKey: 'nav.stockTransfer', permission: 'inventory.transfer' },
 ];
 
+const salesSectionItems: NavItem[] = [
+  { href: '/customers', icon: <Users className="h-4 w-4" />, labelKey: 'nav.customers', permission: 'customers.read' },
+  { href: '/sales', icon: <ShoppingCart className="h-4 w-4" />, labelKey: 'nav.salesOrders', permission: 'sales.read' },
+  { href: '/sales/recurring', icon: <Repeat className="h-4 w-4" />, labelKey: 'nav.recurringInvoices', permission: 'sales.read' },
+  { href: '/sales/templates', icon: <FileStack className="h-4 w-4" />, labelKey: 'nav.invoiceTemplates', permission: 'sales.read' },
+  { href: '/sales/returns', icon: <FileText className="h-4 w-4" />, labelKey: 'nav.creditNotes', permission: 'sales.read' },
+  { href: '/sales/quotes', icon: <FileSpreadsheet className="h-4 w-4" />, labelKey: 'nav.salesQuotes', permission: 'sales.read' },
+  { href: '/sales/cash-sales', icon: <CircleDollarSign className="h-4 w-4" />, labelKey: 'nav.cashSales', permission: 'sales.read' },
+  { href: '/sales/returns', icon: <Undo2 className="h-4 w-4" />, labelKey: 'nav.refunds', permission: 'sales.read' },
+  { href: '/sales/delivery-notes', icon: <TruckIcon className="h-4 w-4" />, labelKey: 'nav.deliveryNotes', permission: 'sales.read' },
+  { href: '/reports', icon: <LineChart className="h-4 w-4" />, labelKey: 'nav.salesAnalytics', permission: 'reports.read' },
+];
+
+const purchaseSectionItems: NavItem[] = [
+  { href: '/purchases', icon: <ShoppingBag className="h-4 w-4" />, labelKey: 'nav.purchases', permission: 'purchases.read' },
+  { href: '/purchases', icon: <ClipboardList className="h-4 w-4" />, labelKey: 'nav.purchaseOrders', permission: 'purchases.read' },
+  { href: '/purchases/returns', icon: <PackageMinus className="h-4 w-4" />, labelKey: 'nav.purchaseReturn', permission: 'purchases.read' },
+  { href: '/suppliers', icon: <Truck className="h-4 w-4" />, labelKey: 'nav.vendors', permission: 'suppliers.read' },
+  { href: '/reports', icon: <LineChart className="h-4 w-4" />, labelKey: 'nav.procurementAnalytics', permission: 'reports.read' },
+];
+
 export function Sidebar({
   locale,
   isDesktopCollapsed,
@@ -89,6 +111,14 @@ export function Sidebar({
   const [stockOpen, setStockOpen] = useState(isStockActive);
   const showInventorySection = user?.role !== 'super_admin' && (visibleInventoryItems.length > 0 || visibleStockItems.length > 0);
   const customersIndex = navItems.findIndex((item) => item.href === '/customers');
+
+  const visibleSalesItems = salesSectionItems.filter((item) => can(item.permission));
+  const showSalesSection = user?.role !== 'super_admin' && visibleSalesItems.length > 0;
+  const salesIndex = navItems.findIndex((item) => item.href === '/sales');
+
+  const visiblePurchaseItems = purchaseSectionItems.filter((item) => can(item.permission));
+  const showPurchaseSection = user?.role !== 'super_admin' && visiblePurchaseItems.length > 0;
+  const purchasesIndex = navItems.findIndex((item) => item.href === '/purchases');
 
   return (
     <>
@@ -142,7 +172,39 @@ export function Sidebar({
 
         <nav className="sidebar-nav flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {(user?.role === 'super_admin' ? navItems.filter((item) => item.href === '/platform-admin') : navItems).map((item, index) => {
-            if (!can(item.permission) && !(item.href === '/customers' && showInventorySection)) return null;
+            const isCustomersAnchor = item.href === '/customers' && showInventorySection;
+            const isSalesAnchor = item.href === '/sales' && showSalesSection;
+            const isPurchasesAnchor = item.href === '/purchases' && showPurchaseSection;
+            if (!can(item.permission) && !isCustomersAnchor && !isSalesAnchor && !isPurchasesAnchor) return null;
+
+            if (index === salesIndex && showSalesSection) {
+              return (
+                <ExpandableSection
+                  key="sales-section"
+                  title={isRTL ? 'المبيعات' : 'Sales'}
+                  items={visibleSalesItems}
+                  pathname={pathname}
+                  isDesktopCollapsed={isDesktopCollapsed}
+                  t={t}
+                  onClick={onMobileClose}
+                />
+              );
+            }
+
+            if (index === purchasesIndex && showPurchaseSection) {
+              return (
+                <ExpandableSection
+                  key="purchase-section"
+                  title={isRTL ? 'المشتريات' : 'Purchase'}
+                  items={visiblePurchaseItems}
+                  pathname={pathname}
+                  isDesktopCollapsed={isDesktopCollapsed}
+                  t={t}
+                  onClick={onMobileClose}
+                />
+              );
+            }
+
             if (index === customersIndex && showInventorySection) {
               return (
                 <div key="inventory-section" className="contents">
@@ -186,6 +248,7 @@ export function Sidebar({
                 </div>
               );
             }
+            if (item.href === '/sales' || item.href === '/purchases') return null;
             return <SidebarLink key={item.href} item={item} pathname={pathname} isDesktopCollapsed={isDesktopCollapsed} t={t} onClick={onMobileClose} />;
           })}
         </nav>
@@ -207,6 +270,35 @@ export function Sidebar({
         </div>
       </aside>
     </>
+  );
+}
+
+function ExpandableSection({
+  title,
+  items,
+  pathname,
+  isDesktopCollapsed,
+  t,
+  onClick,
+}: {
+  title: string;
+  items: NavItem[];
+  pathname: string;
+  isDesktopCollapsed: boolean;
+  t: (key: string) => string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="contents">
+      {!isDesktopCollapsed && (
+        <p className="px-3 pb-1 pt-3 text-xs font-bold uppercase tracking-wide text-navy-400 dark:text-navy-500">
+          {title}
+        </p>
+      )}
+      {items.map((leaf, index) => (
+        <SidebarLink key={`${leaf.href}-${leaf.labelKey}-${index}`} item={leaf} pathname={pathname} isDesktopCollapsed={isDesktopCollapsed} t={t} onClick={onClick} />
+      ))}
+    </div>
   );
 }
 

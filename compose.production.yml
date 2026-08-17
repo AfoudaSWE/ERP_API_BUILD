@@ -9,6 +9,13 @@ x-app-environment: &app-environment
   REDIS_PASSWORD: ${REDIS_PASSWORD:?required}
   JWT_SECRET: ${JWT_SECRET:?required}
   CORS_ORIGIN: ${CORS_ORIGIN:?required}
+  SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+  SMTP_PORT: ${SMTP_PORT:-465}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASS: ${SMTP_PASS:-}
+  MAIL_FROM: ${MAIL_FROM:-}
+  PLATFORM_APPROVAL_EMAIL: ${PLATFORM_APPROVAL_EMAIL:-}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
 
 services:
   migrate:
